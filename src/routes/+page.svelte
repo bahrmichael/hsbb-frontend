@@ -2,10 +2,20 @@
 import Appraisal from '$lib/Appraisal.svelte';
 import Navbar from '$lib/Navbar.svelte';
 import Footer from '$lib/Footer.svelte';
+
+const date = new Date();
+const hideAfter = '2024-05-10';
+const showNewWebsiteNotice = date < new Date(hideAfter);
 </script>
 
 <div id="container" class="container mx-auto">
 	<Navbar />
+	{#if showNewWebsiteNotice}
+		<div role="alert" class="alert mb-10">
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+			<span>Our website has a new design! If anything breaks, please reach out to us on <a class="text-info" href="https://discord.gg/TC3ygpeKvk" target="_blank">Discord</a>.</span>
+		</div>
+	{/if}
 	<Appraisal />
 	<Footer />
 </div>
