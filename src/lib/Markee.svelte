@@ -12,7 +12,7 @@
 	});
 </script>
 
-<div class={"card card-compact bg-secondary-content shadow-xl mb-4"}>
+<div class={"card card-compact bg-accent-content shadow-xl mb-4"}>
 	{#if showImage}
 		<figure>
 			{#if showEvent}
@@ -29,11 +29,11 @@
 		</figure>
 	{/if}
 	<div class="card-body">
-		<h2 class="card-title">3% cheaper with the code <span class="text-secondary">hsbb</span>!</h2>
+		<h2 class="card-title">3% cheaper with the code <span class="text-accent">hsbb</span>!</h2>
 		<p class="mb-2 text-lg">Support Highsec Buyback while paying 3% less for bundles, plex, omega time, and many
 			other items.</p>
 		<div class="card-actions justify-end">
-			<a class="btn btn-secondary"
+			<a class="btn btn-accent"
 				 href="https://store.markeedragon.com/affiliate.php?id=1011&redirect=index.php?cat=4" target="_blank">Visit
 				Markee Dragon Store</a>
 		</div>
