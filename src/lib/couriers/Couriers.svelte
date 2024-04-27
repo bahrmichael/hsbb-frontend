@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Filter from '$lib/couriers/Filter.svelte';
+	import Markee from '$lib/Markee.svelte';
 
 	type Courier = {
 		volume: number;
@@ -75,9 +76,17 @@
 	}
 </script>
 
-<h1 class="text-xl font-bold mb-4">HSBB Courier Stats</h1>
-<p class="mb-1">Here we show you the public couriers we created, and were delivered successfully. You can use the filters on the left to drill down. Use the data to find an appropriate price for your own couriers.</p>
-<p class="mb-10">We update the data irregularly. Right now there are {couriers.length} couriers in the database.</p>
+<div class="flex flex-row gap-16 mb-8">
+	<div class="basis-2/3">
+		<h1 class="text-xl font-bold mb-4">HSBB Courier Stats</h1>
+		<p class="mb-4">Here we show you the public couriers we created, and were delivered successfully. You can use the filters on the left to drill down. Use the data to find an appropriate price for your own couriers.</p>
+		<p>We update the data irregularly. Right now there are {couriers.length} couriers in the database.</p>
+	</div>
+	<div class="basis-1/3">
+		<Markee showImage={false} />
+	</div>
+</div>
+
 <div class="flex">
 	<div class="flex-1">
 		<h2 class="text-lg font-bold">Filters</h2>

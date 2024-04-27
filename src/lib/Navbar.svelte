@@ -24,6 +24,7 @@
 		<ul class="menu menu-horizontal px-1">
 			{#if isHsbb}
 				<li><a href="/courier-stats">Courier Stats</a></li>
+				<li><a href="/contract-stats">Contract Stats</a></li>
 			{/if}
 		</ul>
 	</div>
