@@ -199,9 +199,3 @@
 		</div>
 	</div>
 </div>
-
-<style lang="postcss">
-    li {
-        margin-bottom: 0.5rem;
-    }
-</style>
