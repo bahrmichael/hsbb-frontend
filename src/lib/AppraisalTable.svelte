@@ -18,7 +18,7 @@
 	</tr>
 	</thead>
 	<tbody>
-	{#each items as item}
+	{#each items.sort((a, b) => b.buybackPrice - a.buybackPrice) as item}
 		<tr>
 			<td class="text-lg">
 				<div class="flex items-center gap-3">
