@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ThemePicker from '$lib/ThemePicker.svelte';
 	import { onMount } from 'svelte';
 	import { getInstance } from '$lib/instance';
 
@@ -21,6 +22,7 @@
 		{/if}
 	</div>
 	<div class="flex-none">
+		<ThemePicker />
 		<ul class="menu menu-horizontal px-1">
 			{#if isHsbb}
 				<li><a href="/courier-stats">Courier Stats</a></li>

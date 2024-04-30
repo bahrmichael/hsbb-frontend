@@ -11,7 +11,14 @@ export default {
 
   // daisyUI config (optional - here are the default values)
   daisyui: {
-    themes: ["dark"], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
+    themes: ["dark", {
+      customLight: {
+        "neutral": "#e6e6e6",
+        "base-200": "#cfd0d4",
+        "base-content": "#121827",
+        "accent-content": "#D1D2D6",
+      }
+    }], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
     darkTheme: "dark", // name of one of the included themes for dark mode
   },
 }

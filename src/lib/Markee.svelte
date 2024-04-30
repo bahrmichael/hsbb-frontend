@@ -33,7 +33,7 @@
 		<p class="mb-2 text-lg">Support Highsec Buyback while paying 3% less for bundles, plex, omega time, and many
 			other items.</p>
 		<div class="card-actions justify-end">
-			<a class="btn btn-accent"
+			<a class="btn btn-accent text-gray-100"
 				 href="https://store.markeedragon.com/affiliate.php?id=1011&redirect=index.php?cat=4" target="_blank">Visit
 				Markee Dragon Store</a>
 		</div>
