@@ -22,12 +22,14 @@
 		{/if}
 	</div>
 	<div class="flex-none">
-		<ThemePicker />
 		<ul class="menu menu-horizontal px-1">
 			{#if isHsbb}
 				<li><a href="/courier-stats">Courier Stats</a></li>
 				<li><a href="/contract-stats">Contract Stats</a></li>
 			{/if}
+			<li>
+				<ThemePicker />
+			</li>
 		</ul>
 	</div>
 </div>
