@@ -3,11 +3,9 @@
 
 	export let showImage = true;
 
-	export let showEvent = true;
-
 	onMount(() => {
-		if (new Date('2024-04-29') < new Date()) {
-			showEvent = false;
+		if (new Date('2024-05-30') < new Date()) {
+			showImage = false;
 		}
 	});
 </script>
@@ -15,17 +13,10 @@
 <div class={"card card-compact bg-accent-content shadow-xl mb-4"}>
 	{#if showImage}
 		<figure>
-			{#if showEvent}
-				<img
-					class="overflow-hidden object-cover"
-					src="/markee-event.jpg"
-					alt="Markee Event" />
-			{:else}
-				<img
-					class="overflow-hidden object-cover"
-					src="/markee-default.jpg"
-					alt="Markee Default" />
-			{/if}
+			<img
+				class="overflow-hidden object-cover"
+				src="/markee-event.jpg"
+				alt="Markee Event" />
 		</figure>
 	{/if}
 	<div class="card-body">
