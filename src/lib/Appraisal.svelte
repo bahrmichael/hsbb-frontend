@@ -32,23 +32,10 @@
 	let calculatorInput: string = "";
 	let isSignedIn: boolean = false
 	let isHsbb = true;
-	let showMarkee = false;
 
 	onMount(() => {
 		const token = localStorage.getItem('token-v1')
 		isSignedIn = !!token;
-		if (token) {
-			try {
-				const decoded = jwt.decodeJwt(token);
-				// If the token was issued at least 30 days ago
-				if (decoded.iat && decoded.iat * 1000 < Date.now() - 1000 * 60 * 60 * 24 * 30) {
-					showMarkee = true;
-				}
-			} catch (e) {
-				// I don't want anything to crash if we can't decode the token.
-				console.log('Failed to decode token', e);
-			}
-		}
 		isHsbb = getInstance() === 'highsec';
 		const rememberedText = localStorage.getItem('remember-text');
 		if (rememberedText) {
@@ -172,9 +159,7 @@
 	<div class="grid grid-cols-3 gap-4 mt-4">
 		<div class="col-span-1">
 			<div>
-				{#if showMarkee}
-					<Markee />
-				{/if}
+				<Markee />
 				{#if isHsbb}
 					<SellingPoints />
 				{/if}
