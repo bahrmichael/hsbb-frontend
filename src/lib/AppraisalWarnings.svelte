@@ -15,7 +15,7 @@
 {#if rejectionCodes.includes("bad_isk_per_m3")}
 	<div role="alert" class="alert alert-warning my-4">
 		<WarningIcon />
-		<span>If this contract is on a highsec island, we will reject it. The shipping cost far exceeds the value.</span>
+		<span>If this contract is on a highsec island, we will reject it. You can sell it to <a href="https://lowsec.evebuyback.com/" target="_blank">Lowsec Buyback</a> instead.</span>
 	</div>
 {/if}
 {#if rejectionCodes.includes("contains_capital")}
