@@ -29,7 +29,7 @@
 
 	let appraisalResult: AppraisalResult;
 
-	let calculatorInput: string;
+	let calculatorInput: string = "";
 	let isSignedIn: boolean = false
 	let isHsbb = true;
 	let showMarkee = false;
@@ -116,7 +116,9 @@
 
 	async function signin() {
 		// remember text, and repopulate when coming back from login
-		localStorage.setItem('remember-text', calculatorInput);
+		if (calculatorInput && calculatorInput.length > 3) {
+			localStorage.setItem('remember-text', calculatorInput);
+		}
 		// send to eve sso
 		const instance = getInstance();
 		let clientId;
