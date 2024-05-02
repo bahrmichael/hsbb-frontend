@@ -121,7 +121,7 @@
 		<p class="mb-8">The data is updated manually from time to time.</p>
 	</div>
 	<div class="basis-1/3">
-		<Markee showImage={false} />
+		<Markee compact={true} />
 	</div>
 </div>
 

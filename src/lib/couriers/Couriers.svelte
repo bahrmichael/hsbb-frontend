@@ -83,7 +83,7 @@
 		<p>We update the data irregularly. Right now there are {couriers.length} couriers in the database.</p>
 	</div>
 	<div class="basis-1/3">
-		<Markee showImage={false} />
+		<Markee compact={true} />
 	</div>
 </div>
 
