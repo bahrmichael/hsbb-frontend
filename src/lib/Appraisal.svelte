@@ -99,7 +99,7 @@
 							typeName: item.typeName,
 							quantity: item.quantity,
 							buybackPrice: item.buybackPriceForStack,
-							effectiveRate: item.buybackRate * 100,
+							effectiveRate: Math.round(item.buybackRate * 100),
 							pricingReasons: item.pricingReasons,
 							volumePerUnit: item.volumePerUnit,
 						};
