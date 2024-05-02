@@ -39,16 +39,20 @@
 	<div class={"card card-compact bg-accent-content shadow-xl mb-4"}>
 		{#if selectedImage}
 			<figure>
-				<img
-					class="overflow-hidden object-cover"
-					src={selectedImage}
-					alt="Markee Event" />
+				<a href="https://store.markeedragon.com/affiliate.php?id=1011&redirect=index.php?cat=4" target="_blank">
+					<img
+						class="overflow-hidden object-cover"
+						src={selectedImage}
+						alt="Markee Event" />
+				</a>
 			</figure>
 		{/if}
 		<div class="card-body">
 			{#if isPlexSale}
-				<h2 class="card-title"><span class="text-accent">Rare PLEX sale!</span>3% cheaper with the code <span class="text-accent">hsbb</span>!</h2>
-				<p class="mb-2 text-lg">Rare PLEX sales only happen once a year! You can get another 3% discount by using the code <span class="text-accent">hsbb</span>, and magically support us with your purchase.</p>
+				<h2 class="card-title"><span class="text-accent">Rare PLEX sale!</span>3% cheaper with the code <span
+					class="text-accent">hsbb</span>!</h2>
+				<p class="mb-2 text-lg">Rare PLEX sales only happen once a year! You can get another 3% discount by using the
+					code <span class="text-accent">hsbb</span>, and magically support us with your purchase.</p>
 				<p class="mb-2 text-xs">The sale lasts until {new Date(plexSaleUntil).toLocaleDateString()}.</p>
 				<div class="card-actions justify-end">
 					<a class="btn btn-accent text-neutral"
