@@ -6,7 +6,7 @@
 
 <div class="flex justify-between">
 	<h2 class="card-title font-bold text-2xl">You get <span
-		class="text-success">{total.toLocaleString()}</span>ISK!</h2>
+		class="text-success">{total.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>ISK!</h2>
 	<button class="btn btn-primary text-gray-100 justify-self-end"
 					on:click={() => copy(total.toFixed(2))}>
 		<CopyToClipboardIcon />
