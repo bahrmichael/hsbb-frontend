@@ -15,7 +15,7 @@
 				<figure><img src="/hauler.png" alt="Hauling Ship"/></figure>
 				<div class="card-body">
 					<h2 class="card-title">Hauler</h2>
-					<p>Most of our couriers are available publicly though the ingame couriers. If you can fly a jump freighter, you may reach out to our partner <a href="#" class="text-info" target="_blank">GHSOL</a>.</p>
+					<p>Most of our couriers are available publicly though the ingame couriers. If you can fly a jump freighter, you may reach out to our partner <a href="https://forums.eveonline.com/t/service-ghsol-a-simple-flat-rate-any-distance-jf-courier-service-moving-your-cargo-anywhere-for-the-last-10-years/294052" class="text-info" target="_blank">GHSOL</a>.</p>
 					<div class="card-actions justify-end">
 						<a href="/jobs/couriers" class="btn btn-primary text-gray-100">View our open couriers</a>
 					</div>
