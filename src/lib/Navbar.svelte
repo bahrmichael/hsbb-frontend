@@ -5,11 +5,9 @@
 
 	let isHsbb = true;
 	let name = "Highsec Buyback";
-	let featureJobsEnabled = false;
 	onMount(() => {
 		isHsbb = getInstance() === 'highsec';
 		name = isHsbb ? "Highsec Buyback" : "Lowsec Buyback";
-		featureJobsEnabled = localStorage.getItem('featureJobsEnabled') === 'true'
 	});
 </script>
 
@@ -26,9 +24,7 @@
 	<div class="flex-none">
 		<ul class="menu menu-horizontal px-1">
 			{#if isHsbb}
-				{#if featureJobsEnabled}
-					<li><a href="/jobs">Jobs</a></li>
-				{/if}
+				<li><a href="/jobs">Jobs</a></li>
 				<li><a href="/courier-stats">Courier Stats</a></li>
 				<li><a href="/contract-stats">Contract Stats</a></li>
 			{/if}

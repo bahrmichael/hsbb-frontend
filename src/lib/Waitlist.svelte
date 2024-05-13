@@ -17,13 +17,13 @@
 	<div class="card bg-neutral shadow-xl">
 		<div class="card-body">
 			{#if $page.data.requiresSignIn}
-				<span class="font-bold text-2xl mb-8">Waitlist</span>
+				<span class="font-bold text-2xl mb-4">Waitlist</span>
 				<button on:click={signin} class="btn btn-primary text-gray-100">Sign in to join the waitlist</button>
 			{:else}
-				<span class="font-bold text-2xl mb-8">Waitlist for {$page.data.characterName}</span>
-				<p>When we hire new contract managers we reach out to people on the waitlist. You can then pick any character to join our corporation with.</p>
+				<span class="font-bold text-2xl mb-4">Waitlist for {$page.data.characterName}</span>
+				<p class="mb-4">When we hire new contract managers we reach out to people on the waitlist. You can then pick any character to join our corporation with.</p>
 				{#if $page.data.active}
-					<p class="text-success">You are currently on the waitlist. We will send you an ingame mail when we hire new contract managers.</p>
+					<p class="text-success mb-4">You are currently on the waitlist. We will send you an ingame mail when we hire new contract managers.</p>
 					<form method="post" use:enhance>
 						<button class="btn btn-error text-gray-100" type="submit">Leave the waitlist</button>
 					</form>
@@ -32,7 +32,7 @@
 						<button class="btn btn-primary text-gray-100" type="submit">Join the waitlist</button>
 					</form>
 				{/if}
-				<p>You are currently signed in as {$page.data.characterName}. If you want to switch to a different character, you can <button class="text-info" on:click={signin}>sign in with a different character or account</button>.</p>
+				<p class="mt-4">You are currently signed in as {$page.data.characterName}. If you want to switch to a different character, you can <button class="text-info" on:click={signin}>sign in with a different character or account</button>.</p>
 			{/if}
 		</div>
 	</div>
