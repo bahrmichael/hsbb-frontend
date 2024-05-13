@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import * as jwt from 'jose';
+	import { page } from '$app/stores';
 
 	export let selectedImage = '';
 	export let compact = false;
@@ -11,19 +11,10 @@
 
 	onMount(() => {
 		if (!showMarkee) {
-			const token = localStorage.getItem('token-v1');
-			if (token) {
-				try {
-					const decoded = jwt.decodeJwt(token);
 					// If the token was issued at least 30 days ago
-					if (decoded.iat && decoded.iat * 1000 < Date.now() - 1000 * 60 * 60 * 24 * 30) {
-						showMarkee = true;
-					}
-				} catch (e) {
-					// I don't want anything to crash if we can't decode the token.
-					console.log('Failed to decode token', e);
+				if ($page.data.iat && $page.data.iat * 1000 < Date.now() - 1000 * 60 * 60 * 24 * 7) {
+					showMarkee = true;
 				}
-			}
 		}
 
 		if (showMarkee) {

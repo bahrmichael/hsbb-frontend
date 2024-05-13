@@ -8,9 +8,11 @@
 	import { getInstance } from '$lib/instance';
 	import Markee from '$lib/Markee.svelte';
 	import ErrorIcon from '$lib/icons/Error.svelte';
-	import * as jwt from 'jose';
+	import { page } from '$app/stores';
 
 	type RejectionCode = 'bad_isk_per_m3' | 'contains_capital';
+
+	$: requiresSignIn = $page.data.requiresSignIn || !$page.data.token;
 
 	interface AppraisalResult {
 		appraisalFailures: string | null;
@@ -30,12 +32,9 @@
 	let appraisalResult: AppraisalResult;
 
 	let calculatorInput: string = "";
-	let isSignedIn: boolean = false
 	let isHsbb = true;
 
 	onMount(() => {
-		const token = localStorage.getItem('token-v1')
-		isSignedIn = !!token;
 		isHsbb = getInstance() === 'highsec';
 		const rememberedText = localStorage.getItem('remember-text');
 		if (rememberedText) {
@@ -54,7 +53,6 @@
 			return
 		}
 		const api = `https://5aa6btweli.execute-api.us-east-1.amazonaws.com/dev/appraise`;
-		const token = localStorage.getItem('token-v1');
 		isLoadingAppraisal = true;
 		try {
 			const payload: any = {subdomain: getInstance(), text: calculatorInput};
@@ -63,7 +61,7 @@
 				payload.referrer = referrer;
 			}
 			const headers: any = {
-				Authorization: `Bearer ${token}`
+				Authorization: `Bearer ${$page.data.token}`
 			};
 			const response = await fetch(api, {
 				method: 'post',
@@ -141,7 +139,7 @@
 					</div>
 				{/if}
 				<button class="btn" on:click={() => calculatorInput = ""}>Clear</button>
-				{#if isSignedIn}
+				{#if !requiresSignIn}
 					<button class="btn btn-primary text-gray-100" on:click={submit} disabled={isLoadingAppraisal}>
 						{#if isLoadingAppraisal}
 							<span class="loading loading-spinner loading-sm"></span>

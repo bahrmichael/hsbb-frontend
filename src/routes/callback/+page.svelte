@@ -1,31 +1,24 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
-	import { getInstance } from '$lib/instance';
 	import ErrorIcon from '$lib/icons/Error.svelte';
+	import { page } from '$app/stores';
 
-	const AUTH_API = `https://uc4v3lk6rh.execute-api.us-east-1.amazonaws.com/dev/auth`;
-
-	let failed = false;
+	$: redirectTo = $page.data.redirectTo;
+	$: error= $page.data.error;
 
 	onMount(() => {
-		const code = $page.url.searchParams.get('code');
-		fetch(`${AUTH_API}?code=${code}&appId=${getInstance()}-buyback`)
-			.then((res) => res.json())
-			.then((data) => {
-				localStorage.setItem('token-v1', data.token);
-				goto('/', { replaceState: true });
-			})
-			.catch((err) => {
-				console.error(err);
-				failed = true;
-			});
+		// Clean up old local token
+		localStorage.removeItem('token-v1');
+
+		if (redirectTo) {
+			goto(redirectTo, { replaceState: true });
+		}
 	});
 </script>
 
 <div id="container" class="container mx-auto my-10">
-	{#if failed}
+	{#if error}
 		<div role="alert" class="alert alert-error w-3/4">
 			<ErrorIcon />
 			<span>Failed to log in. Please go to the calculator and try again.</span>

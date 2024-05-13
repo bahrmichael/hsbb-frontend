@@ -2,6 +2,8 @@
 	import Filter from '$lib/couriers/Filter.svelte';
 	import Markee from '$lib/Markee.svelte';
 	import { page } from '$app/stores';
+	import EllipsedName from '$lib/couriers/EllipsedName.svelte';
+	import { onMount } from 'svelte';
 
 	type Courier = {
 		volume: number;
@@ -9,6 +11,10 @@
 		distanceSafe: number;
 		collateral: number;
 		reward: number;
+		from: string;
+		to: string;
+		fromRegion: string;
+		toRegion: string;
 	};
 
 	let couriers: Courier[] = $page.data.couriers.map((c: any) => {
@@ -17,7 +23,11 @@
 			distanceShort: c.d1,
 			distanceSafe: c.d2 ?? c.d1,
 			collateral: c.c,
-			reward: c.r
+			reward: c.r,
+			from: c.f,
+			to: c.t,
+			fromRegion: c.rf,
+			toRegion: c.rt
 		};
 	});
 	let filteredCouriers: Courier[] = [];
@@ -37,13 +47,23 @@
 			(filter.max === null || value <= filter.max);
 	}
 
+	function filterRegion(expected: string, actual: string) {
+		if (!expected) {
+			return true;
+		}
+		return expected === actual;
+	}
+
 	let distanceFilteredCount = 0;
 	let collateralFilteredCount = 0;
 	let rewardFilteredCount = 0;
 	let volumeFilteredCount = 0;
 
-	let sortField: 'distance' | 'collateral' | 'volume' | 'reward' = 'distance';
-	let isSortAscending = true;
+	let selectedStartRegion = '';
+	let selectedEndRegion = '';
+
+	let sortField: 'distance' | 'collateral' | 'volume' | 'reward' | 'from' | 'to' = 'reward';
+	let isSortAscending = false;
 
 	$: distanceFilteredCount = couriers.filter(courier => filterValue(distanceFilter, courier.volume > 62_500 ? courier.distanceSafe : courier.distanceShort)).length;
 	$: collateralFilteredCount = couriers.filter(courier => filterValue(collateralFilter, courier.collateral)).length;
@@ -55,7 +75,10 @@
 			const aDistance = a.volume > 62_500 ? a.distanceSafe : a.distanceShort;
 			const bDistance = b.volume > 62_500 ? b.distanceSafe : b.distanceShort;
 			return aDistance - bDistance;
+		} else if (['from', 'to'].includes(sortField)) {
+			return a[sortField].toString().localeCompare(b[sortField].toString());
 		} else {
+			// @ts-ignore
 			return a[sortField] - b[sortField];
 		}
 	}
@@ -65,7 +88,9 @@
 		const collateralValid = filterValue(collateralFilter, courier.collateral);
 		const rewardValid = filterValue(rewardFilter, courier.reward);
 		const volumeValid = filterValue(volumeFilter, courier.volume);
-		return distanceValid && collateralValid && rewardValid && volumeValid;
+		const fromRegionValid = filterRegion(selectedStartRegion, courier.fromRegion);
+		const toRegionValid = filterRegion(selectedEndRegion, courier.toRegion);
+		return distanceValid && collateralValid && rewardValid && volumeValid && fromRegionValid && toRegionValid;
 	})
 		.sort((a, b) => isSortAscending ? sort(a, b) : sort(b, a))
 		.slice(0, 100);
@@ -81,6 +106,21 @@
 		}
 	}
 
+	function shortNumber(n: number): string {
+		if (n < 1_000) {
+			return n.toString();
+		} else if (n < 1_000_000) {
+			const fixed = n % 1_000 === 0 ? 0 : 1
+			return (n / 1_000).toFixed(fixed) + 'k';
+		} else if (n < 1_000_000_000) {
+			const fixed = n % 1_000_000 === 0 ? 0 : 1
+			return (n / 1_000_000).toFixed(fixed) + 'm';
+		} else {
+			const fixed = n % 1_000_000_000 === 0 ? 0 : 1
+			return (n / 1_000_000_000).toFixed(fixed) + 'b';
+		}
+	}
+
 	function jumps(p: { short: number, safe?: number, highlight?: 'short' | 'safe' }) {
 		if (!p.safe) {
 			return p.short > 1 ? `${p.short} jumps` : `${p.short} jump`;
@@ -90,22 +130,59 @@
 			return `<span class="font-bold">${p.safe}</span> (${p.short}) jumps`;
 		}
 	}
+
+	let regionStartNames: string[] = [];
+	let regionEndNames: string[] = [];
+	onMount(async() => {
+		const response = await fetch('/region-names.json');
+		const allRegionNames = await response.json();
+		regionStartNames = allRegionNames.filter((r: string) => {
+			return undefined != couriers.find(c => c.fromRegion === r);
+		}).sort((a: string, b: string) => a.localeCompare(b));
+		regionEndNames = allRegionNames.filter((r: string) => {
+			return undefined != couriers.find(c => c.toRegion === r);
+		}).sort((a: string, b: string) => a.localeCompare(b));
+	})
 </script>
 
 <div class="flex flex-row gap-16 mb-8">
 	<div class="basis-2/3">
-		<h1 class="text-xl font-bold mb-4">HSBB Courier Stats</h1>
-		<p class="mb-4">Here we show you the public couriers we created, and were delivered successfully. You can use the filters on the left to drill down. Use the data to find an appropriate price for your own couriers.</p>
-		<p>We update the data irregularly. Right now there are {couriers.length} couriers in the database.</p>
+		<h1 class="text-xl font-bold mb-4">HSBB Courier Jobs</h1>
+				<p class="mb-4">On this page you can see outstanding public couriers from HSBB. You can use the filters on the left to drill down.</p>
+				<p>We update this information once per hour. Right now there are {couriers.length} couriers available.</p>
 	</div>
 	<div class="basis-1/3">
 		<Markee compact={true} />
 	</div>
 </div>
 
-<div class="flex">
-	<div class="flex-1">
+<div class="flex flex-row gap-16 mb-8">
+	<div class="basis-1/3">
 		<h2 class="text-lg font-bold">Filters</h2>
+		<div class="flex gap-2 m-6">
+			<label class="basis-1/2 form-control">
+				<span class="flex justify-between items-center font-bold">
+					Start Region
+				</span>
+				<select bind:value={selectedStartRegion} class="select select-bordered w-full">
+					<option value="" selected>None</option>
+					{#each regionStartNames as region}
+						<option value={region}>{region} ({couriers.filter(courier => filterRegion(region, courier.fromRegion)).length})</option>
+					{/each}
+				</select>
+			</label>
+			<label class="basis-1/2 form-control">
+				<span class="flex justify-between items-center font-bold">
+					End Region
+				</span>
+				<select bind:value={selectedEndRegion} class="select select-bordered w-full">
+					<option value="" selected>None</option>
+					{#each regionEndNames as region}
+						<option value={region}>{region} ({couriers.filter(courier => filterRegion(region, courier.toRegion)).length})</option>
+					{/each}
+				</select>
+			</label>
+		</div>
 		<Filter bind:filter={volumeFilter} label="Volume" resultCount={volumeFilteredCount}>
 				<span class="flex justify-left gap-2 items-center">
 					<button on:click={() => volumeFilter = { min: 0, max: 12_250 }} class="btn">Small</button>
@@ -144,24 +221,38 @@
 				</span>
 		</Filter>
 	</div>
-	<div class="flex-1">
+	<div class="basis-2/3">
 
 		<h2 class="text-lg font-bold">Results ({filteredCount})</h2>
 
 		<table class="table m-6">
 			<thead>
 			<tr>
-				<th><button on:click={() => flipSort('distance')}>Distance</button></th>
-				<th><button on:click={() => flipSort('volume')}>Volume</button></th>
-				<th><button on:click={() => flipSort('collateral')}>Collateral</button></th>
-				<th><button on:click={() => flipSort('reward')}>Reward</button></th>
+				<th>
+					<button on:click={() => flipSort('distance')}>Distance</button>
+				</th>
+				<th>
+					<button on:click={() => flipSort('volume')}>Volume</button>
+				</th>
+				<th>
+					<button on:click={() => flipSort('collateral')}>Collateral</button>
+				</th>
+				<th>
+					<button on:click={() => flipSort('reward')}>Reward</button>
+				</th>
+				<th>
+					<button on:click={() => flipSort('from')}>From</button>
+				</th>
+				<th>
+					<button on:click={() => flipSort('to')}>To</button>
+				</th>
 			</tr>
 			</thead>
 			<tbody>
 			{#each filteredCouriers as courier}
 				<tr>
 					{#if courier.distanceShort === courier.distanceSafe}
-							<td>{jumps({short: courier.distanceShort})}</td>
+						<td>{jumps({short: courier.distanceShort})}</td>
 					{:else}
 						{#if courier.volume > 62_500}
 							<td><div class="tooltip" data-tip="For freighter sized couriers we assume the safest route. The shortest route is shown in the brackets.">{@html jumps({short: courier.distanceShort, safe: courier.distanceSafe, highlight: 'safe'})}</div>
@@ -171,9 +262,15 @@
 								<div class="tooltip" data-tip="For couriers that don't need a freighter we assume the shortest route, which is shown in the brackets.">{@html jumps({short: courier.distanceShort, safe: courier.distanceSafe, highlight: 'short'})}</div></td>
 						{/if}
 					{/if}
-					<td>{courier.volume.toLocaleString()} m3</td>
-					<td>{courier.collateral.toLocaleString()} ISK</td>
-					<td>{courier.reward.toLocaleString()} ISK</td>
+					<td>{shortNumber(courier.volume)} m3</td>
+					<td>{shortNumber(courier.collateral)} ISK</td>
+					<td>{shortNumber(courier.reward)} ISK</td>
+					<td>
+						<EllipsedName name={courier.from} region={courier.fromRegion} />
+					</td>
+					<td>
+						<EllipsedName name={courier.to} region={courier.toRegion} />
+					</td>
 				</tr>
 			{/each}
 			</tbody>
