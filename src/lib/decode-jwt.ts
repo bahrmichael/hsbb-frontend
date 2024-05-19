@@ -12,8 +12,8 @@ async function getKey(instance: string) {
 	);
 }
 
-export async function decodeJwt(token: string, url: string): Promise<any> {
-	const instance = url.includes('lowsec') ? 'lsbb' : 'hsbb';
+export async function decodeJwt(token: string, target: string): Promise<any> {
+	const instance = target === 'ingame' ? 'hsbb-ingame' : (target.includes('lowsec') ? 'lsbb' : 'hsbb');
 	const decoded = await jwt.jwtVerify(token, () => getKey(instance));
 	return decoded.payload;
 }

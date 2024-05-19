@@ -5,9 +5,11 @@ export async function load({ cookies, request }) {
 	const url = new URL(request.url);
 	const instance = url.origin.includes('lowsec') ? 'lowsec' : 'highsec';
 	const searchParams = url.searchParams;
+	const state = searchParams.get('state');
+	const appId = state === 'ingame' ? 'hsbb-jobs' : `${instance}-buyback`;
 	const code = searchParams.get('code');
 
-	let authUrl = `${AUTH_API}?code=${code}&appId=${instance}-buyback`;
+	let authUrl = `${AUTH_API}?code=${code}&appId=${appId}`;
 	try {
 		const response = await fetch(authUrl);
 		if (response.status >= 400) {
@@ -16,14 +18,20 @@ export async function load({ cookies, request }) {
 			};
 		}
 		const data = await response.json();
-		cookies.set('token-v1', data.token, {
+
+		const tokenName = state === 'ingame' ? 'token-ingame' : 'token-v1';
+		cookies.set(tokenName, data.token, {
 			path: '/',
 			maxAge: 60 * 60 * 24 * 365 * 10
 		});
 
-		if (searchParams.get('state') === 'waitlist') {
+		if (state === 'waitlist') {
 			return {
 				redirectTo: '/jobs/waitlist'
+			};
+		} else if (state === 'ingame') {
+			return {
+				redirectTo: '/jobs/couriers'
 			};
 		} else {
 			return {

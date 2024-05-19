@@ -4,8 +4,10 @@
 	import { page } from '$app/stores';
 	import EllipsedName from '$lib/couriers/EllipsedName.svelte';
 	import { onMount } from 'svelte';
+	import SquareArrowIcon from '$lib/couriers/SquareArrowIcon.svelte';
 
 	type Courier = {
+		id: number;
 		volume: number;
 		distanceShort: number;
 		distanceSafe: number;
@@ -19,6 +21,7 @@
 
 	let couriers: Courier[] = $page.data.couriers.map((c: any) => {
 		return {
+			id: c.id,
 			volume: c.v,
 			distanceShort: c.d1,
 			distanceSafe: c.d2 ?? c.d1,
@@ -110,13 +113,13 @@
 		if (n < 1_000) {
 			return n.toString();
 		} else if (n < 1_000_000) {
-			const fixed = n % 1_000 === 0 ? 0 : 1
+			const fixed = n % 1_000 === 0 ? 0 : 1;
 			return (n / 1_000).toFixed(fixed) + 'k';
 		} else if (n < 1_000_000_000) {
-			const fixed = n % 1_000_000 === 0 ? 0 : 1
+			const fixed = n % 1_000_000 === 0 ? 0 : 1;
 			return (n / 1_000_000).toFixed(fixed) + 'm';
 		} else {
-			const fixed = n % 1_000_000_000 === 0 ? 0 : 1
+			const fixed = n % 1_000_000_000 === 0 ? 0 : 1;
 			return (n / 1_000_000_000).toFixed(fixed) + 'b';
 		}
 	}
@@ -133,7 +136,8 @@
 
 	let regionStartNames: string[] = [];
 	let regionEndNames: string[] = [];
-	onMount(async() => {
+	onMount(async () => {
+
 		const response = await fetch('/region-names.json');
 		const allRegionNames = await response.json();
 		regionStartNames = allRegionNames.filter((r: string) => {
@@ -142,14 +146,38 @@
 		regionEndNames = allRegionNames.filter((r: string) => {
 			return undefined != couriers.find(c => c.toRegion === r);
 		}).sort((a: string, b: string) => a.localeCompare(b));
-	})
+
+	});
+
+	let showToast = false;
+
+	async function openContractIngame(contractId: number) {
+		await fetch(`/api/open-contract/?contractId=${contractId}`, {
+			method: 'POST'
+		});
+		showToast = true;
+		setTimeout(() => showToast = false, 3_000);
+	}
+
+	async function removeAuthToken() {
+		await fetch(`/api/delete-cookie?cookieName=token-ingame`, {
+			method: `POST`
+		});
+		window.location.reload();
+	}
 </script>
 
 <div class="flex flex-row gap-16 mb-8">
 	<div class="basis-2/3">
 		<h1 class="text-xl font-bold mb-4">HSBB Courier Jobs</h1>
-				<p class="mb-4">On this page you can see outstanding public couriers from HSBB. You can use the filters on the left to drill down.</p>
-				<p>We update this information once per hour. Right now there are {couriers.length} couriers available.</p>
+		<p class="mb-4">On this page you can see outstanding public couriers from HSBB. You can use the filters on the left
+			to drill down.</p>
+		<p>We update this information once per hour. Right now there are {couriers.length} couriers available.</p>
+		{#if $page.data.characterName}
+			<hr class="my-4" />
+			<p class="mt-4">You signed in for opening couriers ingame as {$page.data.characterName}. You can sign out below to switch to a different character.</p>
+			<button class="btn btn-outline mt-4" on:click={removeAuthToken}>Sign out</button>
+		{/if}
 	</div>
 	<div class="basis-1/3">
 		<Markee compact={true} />
@@ -167,7 +195,9 @@
 				<select bind:value={selectedStartRegion} class="select select-bordered w-full">
 					<option value="" selected>None</option>
 					{#each regionStartNames as region}
-						<option value={region}>{region} ({couriers.filter(courier => filterRegion(region, courier.fromRegion)).length})</option>
+						<option value={region}>{region}
+							({couriers.filter(courier => filterRegion(region, courier.fromRegion)).length})
+						</option>
 					{/each}
 				</select>
 			</label>
@@ -178,7 +208,9 @@
 				<select bind:value={selectedEndRegion} class="select select-bordered w-full">
 					<option value="" selected>None</option>
 					{#each regionEndNames as region}
-						<option value={region}>{region} ({couriers.filter(courier => filterRegion(region, courier.toRegion)).length})</option>
+						<option value={region}>{region} ({couriers.filter(courier => filterRegion(region, courier.toRegion)).length}
+							)
+						</option>
 					{/each}
 				</select>
 			</label>
@@ -246,20 +278,33 @@
 				<th>
 					<button on:click={() => flipSort('to')}>To</button>
 				</th>
+				<th>Open</th>
 			</tr>
 			</thead>
 			<tbody>
 			{#each filteredCouriers as courier}
 				<tr>
 					{#if courier.distanceShort === courier.distanceSafe}
-						<td>{jumps({short: courier.distanceShort})}</td>
+						<td>{jumps({ short: courier.distanceShort })}</td>
 					{:else}
 						{#if courier.volume > 62_500}
-							<td><div class="tooltip" data-tip="For freighter sized couriers we assume the safest route. The shortest route is shown in the brackets.">{@html jumps({short: courier.distanceShort, safe: courier.distanceSafe, highlight: 'safe'})}</div>
+							<td>
+								<div class="tooltip"
+										 data-tip="For freighter sized couriers we assume the safest route. The shortest route is shown in the brackets.">{@html jumps({
+									short: courier.distanceShort,
+									safe: courier.distanceSafe,
+									highlight: 'safe'
+								})}</div>
 							</td>
 						{:else}
 							<td>
-								<div class="tooltip" data-tip="For couriers that don't need a freighter we assume the shortest route, which is shown in the brackets.">{@html jumps({short: courier.distanceShort, safe: courier.distanceSafe, highlight: 'short'})}</div></td>
+								<div class="tooltip"
+										 data-tip="For couriers that don't need a freighter we assume the shortest route, which is shown in the brackets.">{@html jumps({
+									short: courier.distanceShort,
+									safe: courier.distanceSafe,
+									highlight: 'short'
+								})}</div>
+							</td>
 						{/if}
 					{/if}
 					<td>{shortNumber(courier.volume)} m3</td>
@@ -271,11 +316,42 @@
 					<td>
 						<EllipsedName name={courier.to} region={courier.toRegion} />
 					</td>
+					<td>
+						{#if $page.data.authenticated}
+							<button class="btn btn-xs btn-ghost" on:click={() => openContractIngame(courier.id)}>
+								<SquareArrowIcon />
+							</button>
+						{:else}
+							<button class="btn btn-xs btn-ghost" on:click={()=>document.getElementById('my_modal_2')?.showModal()}>
+								<SquareArrowIcon />
+							</button>
+							<dialog id="my_modal_2" class="modal">
+								<div class="modal-box text-left">
+									<h3 class="font-bold text-lg">Permission required</h3>
+									<p class="py-4">To open couriers in the EVE client for you, you have to grant that permission. Click
+										on the button below to sign in and grant it.</p>
+									<a
+										href={`https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri=${encodeURIComponent(`https://highsec.evebuyback.com/callback`)}&client_id=3247cabe27284ec9afc7c20971c45234&state=ingame&scope=esi-ui.open_window.v1`}
+										class="btn btn-primary text-gray-100">Sign in</a>
+								</div>
+								<form method="dialog" class="modal-backdrop">
+									<button>close</button>
+								</form>
+							</dialog>
+						{/if}
+					</td>
 				</tr>
 			{/each}
 			</tbody>
 		</table>
 	</div>
+	{#if showToast}
+		<div class="toast">
+			<div class="alert alert-success">
+				<span>Contract opened.</span>
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>
