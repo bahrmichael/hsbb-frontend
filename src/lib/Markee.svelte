@@ -21,7 +21,7 @@
 			if (isPlexSale) {
 				selectedImage = '/markee-event-plex.jpg';
 			} else if (new Date() < new Date('2024-05-30')) {
-				selectedImage = '/markee-event.jog';
+				selectedImage = '/markee-event.jpg';
 			}
 		}
 	});
