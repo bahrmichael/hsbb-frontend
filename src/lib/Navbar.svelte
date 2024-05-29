@@ -4,10 +4,10 @@
 	import { getInstance } from '$lib/instance';
 
 	let isHsbb = true;
-	let name = "Highsec Buyback";
+	let name = 'Highsec Buyback';
 	onMount(() => {
 		isHsbb = getInstance() === 'highsec';
-		name = isHsbb ? "Highsec Buyback" : "Lowsec Buyback";
+		name = isHsbb ? 'Highsec Buyback' : 'Lowsec Buyback';
 	});
 </script>
 
@@ -24,9 +24,21 @@
 	<div class="flex-none">
 		<ul class="menu menu-horizontal px-1">
 			{#if isHsbb}
-				<li><a href="/jobs">Jobs</a></li>
-				<li><a href="/courier-stats">Courier Stats</a></li>
-				<li><a href="/contract-stats">Contract Stats</a></li>
+				<li>
+					<div class="tooltip tooltip-bottom" data-tip="Under maintenance. Please check back tomorrow.">
+						<a class="btn-disabled" href="/jobs">Jobs</a>
+					</div>
+				</li>
+				<li>
+					<div class="tooltip tooltip-bottom" data-tip="Under maintenance. Please check back tomorrow.">
+						<a class="btn-disabled" href="/courier-stats">Courier Stats</a>
+					</div>
+				</li>
+				<li>
+					<div class="tooltip tooltip-bottom" data-tip="Under maintenance. Please check back tomorrow.">
+						<a class="btn-disabled" href="/contract-stats">Contract Stats</a>
+					</div>
+				</li>
 			{/if}
 			<li>
 				<ThemePicker />
