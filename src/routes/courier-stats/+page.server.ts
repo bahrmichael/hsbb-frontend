@@ -8,7 +8,7 @@ export async function load() {
 	const body = await s3.send(new GetObjectCommand({
 		Bucket: env.AWS_BUCKET_NAME,
 		Key: 'couriers-snapshot',
-	})).then((res) => res.Body);
+	})).then((res) => res.Body.transformToString());
 	console.log(body);
 	return {
 		couriers: JSON.parse(body),
