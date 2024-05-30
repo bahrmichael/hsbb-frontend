@@ -9,6 +9,7 @@ export async function load() {
 		Bucket: env.AWS_BUCKET_NAME,
 		Key: 'couriers-snapshot',
 	})).then((res) => res.Body);
+	console.log(body);
 	return {
 		couriers: JSON.parse(body),
 	}
