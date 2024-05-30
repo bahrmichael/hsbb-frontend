@@ -1,17 +1,15 @@
 import { env } from '$env/dynamic/private';
-import { createClient } from '@vercel/kv';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
-function getClient() {
-	return createClient({
-		url: env.KV_REST_API_URL,
-		token: env.KV_REST_API_TOKEN
-	});
-}
+const s3 = new S3Client({ region: 'us-east-1' });
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load() {
-	const data = await getClient().get('couriers-snapshot');
+	const body = await s3.send(new GetObjectCommand({
+		Bucket: env.AWS_BUCKET_NAME,
+		Key: 'couriers-snapshot',
+	})).then((res) => res.Body);
 	return {
-		couriers: data,
+		couriers: JSON.parse(body),
 	}
 }
