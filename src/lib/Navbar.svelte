@@ -14,7 +14,7 @@
 <div class="navbar mt-5 mb-10">
 	<div class="flex-1">
 		{#if isHsbb}
-			<img src="/logo_transparent.png" width="64" alt="HSBB Logo" />
+			<img src="/logo-transparent.png" width="64" alt="HSBB Logo" />
 		{/if}
 		<a class="btn btn-ghost text-xl font-bold mx-4" href="/">{name}</a>
 		{#if isHsbb}
