@@ -25,19 +25,13 @@
 		<ul class="menu menu-horizontal px-1">
 			{#if isHsbb}
 				<li>
-					<div class="tooltip tooltip-bottom" data-tip="Under maintenance. Please check back tomorrow.">
-						<a class="btn-disabled" href="/jobs">Jobs</a>
-					</div>
+						<a href="/jobs">Jobs</a>
 				</li>
 				<li>
-					<div class="tooltip tooltip-bottom" data-tip="Under maintenance. Please check back tomorrow.">
-						<a class="btn-disabled" href="/courier-stats">Courier Stats</a>
-					</div>
+						<a href="/courier-stats">Courier Stats</a>
 				</li>
 				<li>
-					<div class="tooltip tooltip-bottom" data-tip="Under maintenance. Please check back tomorrow.">
-						<a class="btn-disabled" href="/contract-stats">Contract Stats</a>
-					</div>
+						<a href="/contract-stats">Contract Stats</a>
 				</li>
 			{/if}
 			<li>
