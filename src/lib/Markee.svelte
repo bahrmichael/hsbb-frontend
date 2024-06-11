@@ -20,7 +20,7 @@
 		if (showMarkee) {
 			if (isPlexSale) {
 				selectedImage = '/markee-event-plex.jpg';
-			} else if (new Date() < new Date('2024-05-30')) {
+			} else if (new Date() < new Date('2024-06-20')) {
 				selectedImage = '/markee-event.jpg';
 			}
 		}
