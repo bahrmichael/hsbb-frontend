@@ -56,7 +56,7 @@
 			{#if isPlexSale}
 				<h2 class="card-title"><span class="text-accent">Rare PLEX sale!</span>3% cheaper with the code <span
 					class="text-accent">hsbb</span>!</h2>
-				<p class="mb-2 text-lg">Rare PLEX sales only happen once a year! You can get another 3% discount by using the
+				<p class="mb-2 text-lg">A rare PLEX sale is happening! You can get another 3% discount by using the
 					code <span class="text-accent">hsbb</span>, and magically support us with your purchase.</p>
 				<p class="mb-2 text-xs">The sale lasts until {new Date(plexSaleUntil).toLocaleDateString()}.</p>
 				<div class="card-actions justify-end">
