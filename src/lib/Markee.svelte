@@ -5,7 +5,7 @@
 	export let selectedImage = '';
 	export let compact = false;
 
-	const plexSaleUntil = '2024-05-09';
+	const plexSaleUntil = '2024-06-19';
 	const isPlexSale = new Date() <= new Date(plexSaleUntil);
 	let showMarkee = isPlexSale;
 
