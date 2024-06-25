@@ -19,11 +19,13 @@ export async function load({ cookies, request }) {
 		}
 		const data = await response.json();
 
-		const tokenName = state === 'ingame' ? 'token-ingame' : 'token-v1';
-		cookies.set(tokenName, data.token, {
-			path: '/',
-			maxAge: 60 * 60 * 24 * 365 * 10
-		});
+		if (state !== 'audit') {
+			const tokenName = state === 'ingame' ? 'token-ingame' : 'token-v1';
+			cookies.set(tokenName, data.token, {
+				path: '/',
+				maxAge: 60 * 60 * 24 * 365 * 10
+			});
+		}
 
 		if (state === 'waitlist') {
 			return {
@@ -32,6 +34,10 @@ export async function load({ cookies, request }) {
 		} else if (state === 'ingame') {
 			return {
 				redirectTo: '/jobs/couriers'
+			};
+		} else if (state === 'audit') {
+			return {
+				redirectTo: '/audit/complete'
 			};
 		} else {
 			return {
