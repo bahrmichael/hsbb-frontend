@@ -6,7 +6,7 @@ export async function load({ cookies, request }) {
 	const instance = url.origin.includes('lowsec') ? 'lowsec' : 'highsec';
 	const searchParams = url.searchParams;
 	const state = searchParams.get('state');
-	const appId = state === 'ingame' ? 'hsbb-jobs' : `${instance}-buyback`;
+	const appId = state === 'ingame' ? 'hsbb-jobs' : ( state === 'audit' ? 'hsbb-member-audit' : `${instance}-buyback`);
 	const code = searchParams.get('code');
 
 	let authUrl = `${AUTH_API}?code=${code}&appId=${appId}`;
