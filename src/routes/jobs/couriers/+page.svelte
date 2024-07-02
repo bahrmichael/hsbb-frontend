@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>HSBB Courier Stats</title>
+	<title>HSBB Open Couriers</title>
 </svelte:head>
 
 <div id="container" class="container mx-auto">
