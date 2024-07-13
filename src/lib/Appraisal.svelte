@@ -106,18 +106,18 @@
 		}
 		// send to eve sso
 		const instance = getInstance();
-		let clientId = '3eff32a4e4ec4d749f2a63dea066449d';
-		// switch (instance) {
-		// 	case 'highsec':
-		// 		clientId = '7817dc406c90427db9d3570bb3cc495b';
-		// 		break;
-		// 	case 'lowsec':
-		// 		clientId = '542b75e8f71c4fb8aec7d58cdbc1fba5';
-		// 		break;
-		// 	default:
-		// 		throw Error('Unhandled instance. ClientId resolution.');
-		// }
-		window.location.replace(`https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri=${encodeURIComponent(`http://localhost:5173/callback`)}&client_id=${clientId}&state=nah`);
+		let clientId;
+		switch (instance) {
+			case 'highsec':
+				clientId = '7817dc406c90427db9d3570bb3cc495b';
+				break;
+			case 'lowsec':
+				clientId = '542b75e8f71c4fb8aec7d58cdbc1fba5';
+				break;
+			default:
+				throw Error('Unhandled instance. ClientId resolution.');
+		}
+		window.location.replace(`https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri=${encodeURIComponent(`https://${instance}.evebuyback.com/callback`)}&client_id=${clientId}&state=nah`);
 	}
 </script>
 
