@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Filter from '$lib/couriers/Filter.svelte';
-	import Markee from '$lib/Markee.svelte';
+	import EveStore from '$lib/EveStore.svelte';
 	import { page } from '$app/stores';
 	import EllipsedName from '$lib/couriers/EllipsedName.svelte';
 	import { onMount } from 'svelte';
@@ -180,7 +180,7 @@
 		{/if}
 	</div>
 	<div class="basis-1/3">
-		<Markee compact={true} />
+		<EveStore compact={true} />
 	</div>
 </div>
 

@@ -6,7 +6,7 @@
 	import AppraisalTable from '$lib/AppraisalTable.svelte';
 	import { onMount } from 'svelte';
 	import { getInstance } from '$lib/instance';
-	import Markee from '$lib/Markee.svelte';
+	import EveStore from '$lib/EveStore.svelte';
 	import ErrorIcon from '$lib/icons/Error.svelte';
 	import { page } from '$app/stores';
 
@@ -161,7 +161,7 @@
 	<div class="grid grid-cols-3 gap-4 mt-4">
 		<div class="col-span-1">
 			<div>
-				<Markee />
+				<EveStore />
 				{#if isHsbb}
 					<SellingPoints />
 				{/if}

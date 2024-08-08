@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Chart, registerables } from 'chart.js';
-	import Markee from '$lib/Markee.svelte';
+	import EveStore from '$lib/EveStore.svelte';
 
 	Chart.register(...registerables);
 
@@ -121,7 +121,7 @@
 		<p class="mb-8">The data is updated manually from time to time.</p>
 	</div>
 	<div class="basis-1/3">
-		<Markee compact={true} />
+		<EveStore compact={true} />
 	</div>
 </div>
 

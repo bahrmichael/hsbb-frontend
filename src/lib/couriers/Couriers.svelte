@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Filter from '$lib/couriers/Filter.svelte';
-	import Markee from '$lib/Markee.svelte';
+	import EveStore from '$lib/EveStore.svelte';
 	import { page } from '$app/stores';
 
 	type Courier = {
@@ -99,7 +99,7 @@
 		<p>We update the data irregularly. Right now there are {couriers.length} couriers in the database.</p>
 	</div>
 	<div class="basis-1/3">
-		<Markee compact={true} />
+		<EveStore compact={true} />
 	</div>
 </div>
 
