@@ -5,9 +5,10 @@ import { env } from '$env/dynamic/private';
 const ddb = new DynamoDBClient({region: "us-east-1"});
 
 /** @type {import('./$types').RequestHandler} */
-export async function POST({ url }) {
+export async function GET({ url }) {
 	const store = url.searchParams.get('store');
 	const compact = url.searchParams.get('compact') ?? false;
+	const campaign = url.searchParams.get('campaign') ?? "";
 	try {
 		await ddb.send(new UpdateCommand({
 			TableName: env.AWS_STORE_TABLE_NAME,
@@ -15,13 +16,15 @@ export async function POST({ url }) {
 				'pk': `store-click#${store}#${compact}`,
 				'sk': `${new Date().toISOString().split('T')[0]}`
 			},
-			UpdateExpression: 'set #counter = if_not_exists(#counter, :init) + :inc',
+			UpdateExpression: 'set #counter = if_not_exists(#counter, :init) + :inc, #campaign = :campaign',
 			ExpressionAttributeValues: {
 				':inc': 1,
-				':init': 0
+				':init': 0,
+				':campaign': campaign,
 			},
 			ExpressionAttributeNames: {
-				'#counter': 'counter'
+				'#counter': 'counter',
+				'#campaign': 'campaign',
 			}
 		}));
 	} catch (e) {
