@@ -18,15 +18,18 @@
 		}
 	}
 
+	let campaign = '';
+
 	onMount(async () => {
 		if (showEveStore) {
 			if (isPlexSale && !compact) {
 				selectedImage = '/store-event-equinox-plex.jpg';
+				campaign = 'plex';
 			} else if (new Date() < new Date('2024-06-20') && !compact) {
 				selectedImage = '/store-event-equinox-pack.jpg';
-			} else {
-				await fetch(`/api/store/view?store=${storeSelect}&compact=${compact}`);
+				campaign = 'equinox';
 			}
+			await fetch(`/api/store/view?store=${storeSelect}&compact=${compact}&campaign=${campaign}`);
 		}
 	});
 </script>

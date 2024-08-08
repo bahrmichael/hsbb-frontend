@@ -4,8 +4,8 @@ import { env } from '$env/dynamic/private';
 
 const ddb = new DynamoDBClient({region: "us-east-1"});
 
-/** @type {import('./$types').RequestHandler} */
-export async function GET({ url }) {
+/** @type {import('./$types').PageServerLoad} */
+export async function load({url}) {
 	const store = url.searchParams.get('store');
 	const compact = url.searchParams.get('compact') ?? false;
 	const campaign = url.searchParams.get('campaign') ?? "";
@@ -30,5 +30,12 @@ export async function GET({ url }) {
 	} catch (e) {
 		console.error('store-click', {store}, e);
 	}
-	return new Response(null, { status: 200 });
+
+	const link = store === 'partner' ?
+		'https://store.eveonline.com/?code=hsbb' :
+		'https://store.markeedragon.com/affiliate.php?id=1011&redirect=index.php?cat=4';
+
+	return {
+		redirectTo: link,
+	}
 }

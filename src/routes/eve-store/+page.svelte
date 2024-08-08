@@ -2,16 +2,10 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 
-	const store = $page.params.store;
-	const link = store === 'partner' ?
-		'https://store.eveonline.com/?code=hsbb' :
-		'https://store.markeedragon.com/affiliate.php?id=1011&redirect=index.php?cat=4';
+	const link = $page.data.redirectTo;
 
 	onMount(() => {
-		fetch(`/api/store/click?store=${store}`)
-			.finally(() => {
-				window.location.replace(link);
-			});
+			window.location.replace(link);
 	});
 </script>
 
