@@ -5,7 +5,7 @@
 	export let selectedImage = '';
 	export let compact = false;
 
-	const plexSaleUntil = '2024-06-19';
+	const plexSaleUntil = '2024-10-08';
 	const isPlexSale = new Date() <= new Date(plexSaleUntil);
 	let showEveStore = isPlexSale;
 
@@ -23,7 +23,7 @@
 	onMount(async () => {
 		if (showEveStore) {
 			if (isPlexSale && !compact) {
-				selectedImage = '/store-event-equinox-plex.jpg';
+				selectedImage = '/store-event-plex-event-2024-10.jpg';
 				campaign = 'plex';
 			} else if (new Date() <= new Date('2024-09-02') && !compact) {
 				selectedImage = '/store-event-atxx.jpg';
