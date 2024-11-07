@@ -25,9 +25,9 @@
 			if (isPlexSale && !compact) {
 				selectedImage = '/store-event-plex-event-2024-10.jpg';
 				campaign = 'plex';
-			} else if (new Date() <= new Date('2024-10-28') && !compact) {
-				selectedImage = '/store-event-atxx-omega.jpg';
-				campaign = 'atxx-omega';
+			} else if (new Date() <= new Date('2024-12-14') && !compact) {
+				selectedImage = '/store-event-skill-extractor.jpg';
+				campaign = 'skill-extractor';
 			}
 			await fetch(`/api/store/view?store=${storeSelect}&compact=${compact}&campaign=${campaign}`);
 		}
