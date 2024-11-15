@@ -23,7 +23,7 @@
 	onMount(async () => {
 		if (showEveStore) {
 			if (isPlexSale && !compact) {
-				selectedImage = '/store-event-plex-november.png.jpg';
+				selectedImage = '/store-event-plex-november.png';
 				campaign = 'plex';
 			} else if (new Date() <= new Date('2024-12-14') && !compact) {
 				selectedImage = '/store-event-skill-extractor.jpg';
