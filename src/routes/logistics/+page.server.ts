@@ -41,6 +41,15 @@ export async function load({ cookies, request }) {
 
 	const balance = transactions[0]?.balance ?? 0;
 
+	const outstandingContracts = records.find((r: any) => r.sk === 'outstandingContracts')?.contracts
+		.map((r: any) => {
+			return {
+				...r,
+				// todo: get location name
+				locationName: r.start_location_id,
+			}
+		});
+
 	return {
 		characterId,
 		characterName: name,
@@ -48,19 +57,11 @@ export async function load({ cookies, request }) {
 		iat,
 		balance,
 		transactions,
-		outstandingContracts: records.find((r: any) => r.sk === 'outstandingContracts')?.contracts
-			.map((r: any) => {
-				return {
-					...r,
-					// todo: get location name
-					locationName: r.start_location_id,
-				}
-			}),
-
+		outstandingContracts,
 		pendingItems: records
 			.filter((r: any) => r.sk.startsWith('item#'))
 			.filter((r: any) => r.amount !== 0)
-			.sort((a: any, b: any) => a.name.localeCompare(b.name))
+			.sort((a: any, b: any) => a.typeName.localeCompare(b.typeName))
 			.map((r: any) => {
 				return {
 					...r,

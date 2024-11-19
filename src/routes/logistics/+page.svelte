@@ -22,7 +22,7 @@
 
 	function countDays(date: Date): number {
 		const today = new Date();
-		const timeDiff = Math.abs(today.getTime() - date.getTime());
+		const timeDiff = Math.abs(today.getTime() - new Date(date).getTime());
 		return Math.ceil(timeDiff / (1000 * 3600 * 24));
 	}
 
@@ -65,6 +65,15 @@
 		}
 		return toF(value / 1_000_000_000, 2) + 'b';
 	};
+
+	function mapTransactionType(transactionType: string) {
+		switch (transactionType) {
+			case "contractOut":
+				return "Contract accepted";
+			default:
+				return transactionType
+		}
+	}
 </script>
 
 <svelte:head>
@@ -184,7 +193,7 @@
 											<tbody>
 											{#each $page.data.transactions as t}
 												<tr class="">
-													<td class="px-4 py-2">{t.transactionType}</td>
+													<td class="px-4 py-2">{mapTransactionType(t.transactionType)}</td>
 													<td class="px-4 py-2">{new Date(t.created).toLocaleDateString()}</td>
 													<td class="px-4 py-2 text-right"><span
 														class={t.amount >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk(t.amount)}</span></td>
@@ -348,10 +357,10 @@
 									{#each $page.data.pendingItems as item}
 										<tr class="">
 											<td class="px-4 py-2">
-												<img src={`https://images.evetech.net/types/${item.typeId}/icon?size=32`} alt={item.name}
+												<img src={`https://images.evetech.net/types/${item.typeId}/icon?size=32`} alt={item.typeName}
 														 class="w-8 h-8" />
 											</td>
-											<td class="px-4 py-2">{item.name}</td>
+											<td class="px-4 py-2">{item.typeName}</td>
 											<td class="px-4 py-2 text-right">
 												<span class={getDaysClass(countDays(item.updated))}>
 													{countDays(item.updated)}
