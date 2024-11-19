@@ -76,7 +76,7 @@
 	<main class="min-h-screen p-4">
 		{#if $page.data.requiresSignIn}
 			<div class="max-w-2xl mx-auto space-y-6 text-center">
-				<h1 class="text-3xl font-bold">Welcome to the HSBB Logistics program</h1>
+				<h1 class="text-3xl font-bold">Welcome to the HSBB Logistics Program (Beta)</h1>
 				<p class="text-gray-600">
 					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
 					labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
@@ -91,7 +91,7 @@
 			</div>
 		{:else}
 			<div class="space-y-4">
-				<h1 class="px-6 text-3xl font-bold">HSBB Logistics</h1>
+				<h1 class="px-6 text-3xl font-bold">HSBB Logistics (Beta)</h1>
 				<p class="px-6">With the HSBB Logistics program you can help us move assets to <a
 					href="https://universe.eveonline.com/lore/jita-iv-moon-4-caldari-navy-assembly-plant" class="link">Jita</a>,
 					and profit while doing so. You
