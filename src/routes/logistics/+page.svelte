@@ -19,7 +19,7 @@
 				value: selectedValue
 			})
 		});
-		alert("Request received. You're now in the queue!")
+		alert('Request received. You\'re now in the queue!');
 	};
 
 	function handleLogin() {
@@ -37,7 +37,7 @@
 	}
 
 	function exportToCsv() {
-		alert("This is not implemented yet. Just ping Lerso on Discord.")
+		alert('This is not implemented yet. Just ping Lerso on Discord.');
 	}
 
 	const getDaysClass = (days: number) => {
@@ -74,10 +74,10 @@
 
 	function mapTransactionType(transactionType: string) {
 		switch (transactionType) {
-			case "contractOut":
-				return "Contract accepted";
+			case 'contractOut':
+				return 'Contract accepted';
 			default:
-				return transactionType
+				return transactionType;
 		}
 	}
 </script>
@@ -157,8 +157,10 @@
 											return it for <span class="text-blue-400">10b ISK</span>. You receive a 3% reward
 											of <span class="text-green-400">300m ISK</span>.
 										</li>
-										<li class="list-disc">You accept a contract for <span class="text-blue-400">2b ISK</span>. While moving
-											the items you accept another contract for <span class="text-blue-400">5b ISK</span>. You wait for all
+										<li class="list-disc">You accept a contract for <span class="text-blue-400">2b ISK</span>. While
+											moving
+											the items you accept another contract for <span class="text-blue-400">5b ISK</span>. You wait for
+											all
 											items to arrive in Jita, and return all of them for <span class="text-blue-400">7b ISK</span>.
 											Your 3% reward is <span class="text-green-400">210m ISK</span>.
 										</li>
@@ -172,10 +174,12 @@
 							<div class="rounded-lg p-6">
 								<div class="mb-4">
 									<div class="flex justify-between items-center mb-4">
-										<h2 class="text-xl font-semibold">Your Balance: <span class="text-green-600">{formatIsk($page.data.balance)}</span> (<span class="text-blue-400">{formatIsk($page.data.remainingContractCollateral)}</span> Collateral)</h2>
-<!--										<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
-<!--											Export to CSV-->
-<!--										</button>-->
+										<h2 class="text-xl font-semibold">Your Balance: <span
+											class="text-green-600">{formatIsk($page.data.balance)}</span> (<span
+											class="text-blue-400">{formatIsk($page.data.remainingContractCollateral)}</span> Collateral)</h2>
+										<!--										<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
+										<!--											Export to CSV-->
+										<!--										</button>-->
 									</div>
 								</div>
 								{#if $page.data.transactions && $page.data.transactions.length > 0}
@@ -274,8 +278,10 @@
 							<div class="rounded-lg p-6">
 								<h2 class="text-xl font-semibold mb-4">Outstanding Contracts</h2>
 								<p class="text-gray-400 mb-4">
-									You will receive contracts from Highsec Buyback to {$page.data.characterName}. Each of them is priced a Jita Buy using
-									the <a href="https://janice.e-351.com/" class="link" target="_blank">janice appraisal</a>. The pricing helps us get
+									You will receive contracts from Highsec Buyback to {$page.data.characterName}. Each of them is priced
+									a Jita Buy using
+									the <a href="https://janice.e-351.com/" class="link" target="_blank">janice appraisal</a>. The pricing
+									helps us get
 									a fair collateral on the items. You don't need to travel to the location of the items, but can use
 									your remote inventory ingame to pick items and create public couriers. You can see your outstanding
 									contracts below.
@@ -296,7 +302,8 @@
 													<td class="px-4 py-2">{new Date(contract.issued).toLocaleDateString()}</td>
 													<td class="px-4 py-2">{formatIsk(contract.price)}</td>
 													<td class="px-4 py-2 truncate max-w-xs" title={contract.locationName}>
-														<a href={`https://evemaps.dotlan.net/station/${contract.locationName.replaceAll(" ", "_")}`} target="_blank" class="link">{contract.locationName}</a>
+														<a href={`https://evemaps.dotlan.net/station/${contract.locationName.replaceAll(" ", "_")}`}
+															 target="_blank" class="link">{contract.locationName}</a>
 													</td>
 												</tr>
 											{/each}
@@ -304,7 +311,7 @@
 										</table>
 									</div>
 								{:else}
-									<p class="text-gray-400">No outstanding contracts.</p>
+									<p class="text-gray-400">There are no outstanding contracts. You can request a new contract on the left. It may take up to an hour for changes to appear here.</p>
 								{/if}
 							</div>
 						</div>
@@ -331,9 +338,8 @@
 								</div>
 							{:else}
 								<p class="text-gray-400">
-									Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore
-									et
-									dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
+									If you contracted too many items or lost some, just contact Lerso Nardieu. We'll credit them
+									accordingly'.
 								</p>
 							{/if}
 						</div>
@@ -344,42 +350,48 @@
 						<div class="rounded-lg p-6">
 							<div class="flex justify-between items-center mb-4">
 								<h2 class="text-xl font-semibold">Items Held</h2>
-<!--								<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
-<!--									Export to CSV-->
-<!--								</button>-->
+								<!--								<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
+								<!--									Export to CSV-->
+								<!--								</button>-->
 							</div>
 							<p class="text-gray-400 mb-4">
-								When you have the items in Jita IV 4, you can appraise them with <a href="https://janice.e-351.com/" class="link" target="_blank">janice</a>
+								When you have the items in Jita IV 4, you can appraise them with <a href="https://janice.e-351.com/"
+																																										class="link"
+																																										target="_blank">janice</a>
 								and send a contract to Lerso Nardieu.
 							</p>
-							<div class="overflow-x-auto">
-								<table class="w-full table-auto">
-									<thead>
-									<tr class="border-b">
-										<th colspan="2" class="px-4 py-2 text-left">Item</th>
-										<th class="px-4 py-2 text-right">Quantity</th>
-										<th class="px-4 py-2 text-right">Days Held</th>
-									</tr>
-									</thead>
-									<tbody>
-									{#each $page.data.pendingItems as item}
-										<tr class="">
-											<td class="px-4 py-2 w-24">
-												<img src={`https://images.evetech.net/types/${item.typeId}/icon?size=32`} alt={item.typeName}
-														 class="w-8 h-8" />
-											</td>
-											<td class="px-4 py-2">{item.typeName}</td>
-											<td class="px-4 py-2 text-right">{formatValue(item.amount)}</td>
-											<td class="px-4 py-2 text-right">
+							{#if $page.data.pendingItems?.length > 0 }
+								<div class="overflow-x-auto">
+									<table class="w-full table-auto">
+										<thead>
+										<tr class="border-b">
+											<th colspan="2" class="px-4 py-2 text-left">Item</th>
+											<th class="px-4 py-2 text-right">Quantity</th>
+											<th class="px-4 py-2 text-right">Days Held</th>
+										</tr>
+										</thead>
+										<tbody>
+										{#each $page.data.pendingItems as item}
+											<tr class="">
+												<td class="px-4 py-2 w-24">
+													<img src={`https://images.evetech.net/types/${item.typeId}/icon?size=32`} alt={item.typeName}
+															 class="w-8 h-8" />
+												</td>
+												<td class="px-4 py-2">{item.typeName}</td>
+												<td class="px-4 py-2 text-right">{formatValue(item.amount)}</td>
+												<td class="px-4 py-2 text-right">
 												<span class={getDaysClass(countDays(item.updated))}>
 													{countDays(item.updated)}
 												</span>
-											</td>
-										</tr>
-									{/each}
-									</tbody>
-								</table>
-							</div>
+												</td>
+											</tr>
+										{/each}
+										</tbody>
+									</table>
+								</div>
+							{:else}
+								No items held. Please request a contract, or accept an outstanding one. It may take up to an hour for changes to appear here.
+							{/if}
 						</div>
 					</div>
 				</div>
