@@ -1,9 +1,37 @@
 import { env } from '$env/dynamic/private';
 import { decodeJwt } from '$lib/decode-jwt.ts';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import axios from 'axios';
 
 const ddb = new DynamoDBClient({ region: 'us-east-1' });
+
+async function getLocationName(locationId: number) {
+	const res = await ddb.send(new GetCommand({
+		TableName: env.AWS_LOGISTICS_TABLE_NAME,
+		Key: {
+			pk: `location`,
+			sk: `${locationId}`,
+		},
+	}));
+
+	if (res.Item) {
+		return res.Item.name;
+	}
+
+	const station = await axios.get(`https://esi.evetech.net/v2/universe/stations/${locationId}/`);
+
+	await ddb.send(new PutCommand({
+		TableName: env.AWS_LOGISTICS_TABLE_NAME,
+		Item: {
+			pk: `location`,
+			sk: `${locationId}`,
+			name: station.data.name,
+		},
+	}));
+
+	return station.data.name;
+}
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
@@ -39,24 +67,37 @@ export async function load({ cookies, request }) {
 		.filter((r: any) => r.amount !== 0)
 			.sort((a: any, b: any) => b.created - a.created);
 
+	const remainingContractCollateral = transactions
+		.filter((r: any) => r.transactionType.startsWith('contract'))
+		.map((r: any) => r.amount)
+		.reduce((a: any, b: any) => a + b, 0);
+
+	// @ts-ignore
 	const balance = transactions[0]?.balance ?? 0;
 
-	const outstandingContracts = records.find((r: any) => r.sk === 'outstandingContracts')?.contracts
-		.map((r: any) => {
-			return {
-				...r,
-				// todo: get location name
-				locationName: r.start_location_id,
-			}
-		});
+	// @ts-ignore
+	const outstandingContracts = records.find((r: any) => r.sk === 'outstandingContracts')?.contracts ?? [];
+	for (const c of outstandingContracts ) {
+		c.locationName = await getLocationName(c.start_location_id);
+	}
+
+	const existingContractRequest = (await ddb.send(new GetCommand({
+		TableName: env.AWS_LOGISTICS_TABLE_NAME,
+		Key: {
+			pk: `requests`,
+			sk: `character#${characterId}`
+		}
+	}))).Item;
 
 	return {
 		characterId,
 		characterName: name,
 		token,
 		iat,
+		hasContractRequest: !!existingContractRequest,
 		balance,
 		transactions,
+		remainingContractCollateral,
 		outstandingContracts,
 		pendingItems: records
 			.filter((r: any) => r.sk.startsWith('item#'))
@@ -92,6 +133,7 @@ const getPaginatedResults = async(fn: any) => {
 			count = ct;
 		}
 	})()) {
+		// @ts-ignore
 		res.push(lf);
 	}
 

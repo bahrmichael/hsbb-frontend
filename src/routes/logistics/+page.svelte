@@ -12,8 +12,14 @@
 	];
 	let selectedValue = contractValues[0];
 
-	const handleContractRequest = () => {
-		alert("This is not implemented yet. Just ping Lerso on Discord.")
+	const handleContractRequest = async () => {
+		await fetch(`/api/logistics/request-contract/`, {
+			method: 'POST',
+			body: JSON.stringify({
+				value: selectedValue
+			})
+		});
+		alert("Request received. You're now in the queue!")
 	};
 
 	function handleLogin() {
@@ -148,17 +154,13 @@
 									our system accounts for that. Here are two examples:
 									<ul class="m-4">
 										<li class="list-disc">You accept a contract for <span class="text-blue-400">10b ISK</span>, and
-											return it for <span class="text-blue-400">9.5b ISK</span> because the items lost some value. That's a <span class="text-red-400">-500m ISK</span>
-											difference. You receive a 3% reward of <span class="text-green-400">300m ISK</span>. In summary
-											you'll receive a transfer of <span class="text-green-400">800m ISK</span>, yielding a profit of
-											<span class="text-green-400">300m ISK</span>.
+											return it for <span class="text-blue-400">10b ISK</span>. You receive a 3% reward
+											of <span class="text-green-400">300m ISK</span>.
 										</li>
-										<li class="list-disc">You accept a contract for <span class="text-blue-400">2b ISK</span>, and
-											return it for <span class="text-blue-400">2.1b ISK</span> because the items gained some value. That's a <span class="text-green-400">100m ISK</span>
-											difference. Your 3% reward would be <span class="text-green-400">60m ISK</span>. In summary you'll
-											have a profit of <span class="text-green-400">100m ISK</span> while having a balance of <span
-												class="text-red-400">-40m ISK</span>. We will not require you to send ISK, but will wait for the
-											next transactions to balance it out.
+										<li class="list-disc">You accept a contract for <span class="text-blue-400">2b ISK</span>. While moving
+											the items you accept another contract for <span class="text-blue-400">5b ISK</span>. You wait for all
+											items to arrive in Jita, and return all of them for <span class="text-blue-400">7b ISK</span>.
+											Your 3% reward is <span class="text-green-400">210m ISK</span>.
 										</li>
 									</ul>
 								</div>
@@ -170,7 +172,7 @@
 							<div class="rounded-lg p-6">
 								<div class="mb-4">
 									<div class="flex justify-between items-center mb-4">
-										<h2 class="text-xl font-semibold">Your Balance: <span class="text-green-600">{formatIsk($page.data.balance)}</span></h2>
+										<h2 class="text-xl font-semibold">Your Balance: <span class="text-green-600">{formatIsk($page.data.balance)}</span> (<span class="text-blue-400">{formatIsk($page.data.remainingContractCollateral)}</span> Collateral)</h2>
 <!--										<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
 <!--											Export to CSV-->
 <!--										</button>-->
@@ -248,14 +250,19 @@
 									</div>
 									<button
 										type="submit"
-										class="w-full bg-blue-600 text-white px-4 py-2 rounded-md transition-colors {$page.data.outstandingContracts?.length ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}"
-										disabled={$page.data.outstandingContracts?.length > 0}
+										class="w-full bg-blue-600 text-white px-4 py-2 rounded-md transition-colors {($page.data.outstandingContracts?.length || $page.data.hasContractRequest) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}"
+										disabled={$page.data.outstandingContracts?.length > 0 || $page.data.hasContractRequest}
 									>
 										Request contracts
 									</button>
 									{#if $page.data.outstandingContracts?.length > 0}
 										<p class="text-gray-500">
 											Please accept all outstanding contracts first.
+										</p>
+									{/if}
+									{#if $page.data.hasContractRequest}
+										<p class="text-gray-500">
+											You already requested a contract.
 										</p>
 									{/if}
 								</form>
@@ -268,12 +275,12 @@
 								<h2 class="text-xl font-semibold mb-4">Outstanding Contracts</h2>
 								<p class="text-gray-400 mb-4">
 									You will receive contracts from Highsec Buyback to {$page.data.characterName}. Each of them is priced a Jita Buy using
-									the <a href="https://janice.e-351.com/" class="link">janice appraisal</a>. The pricing helps us get
+									the <a href="https://janice.e-351.com/" class="link" target="_blank">janice appraisal</a>. The pricing helps us get
 									a fair collateral on the items. You don't need to travel to the location of the items, but can use
 									your remote inventory ingame to pick items and create public couriers. You can see your outstanding
 									contracts below.
 								</p>
-								{#if $page.data.outstandingContracts && $page.data.outstandingContracts.length > 0}
+								{#if $page.data.outstandingContracts?.length > 0}
 									<div class="overflow-x-auto">
 										<table class="w-full table-auto">
 											<thead>
@@ -289,7 +296,7 @@
 													<td class="px-4 py-2">{new Date(contract.issued).toLocaleDateString()}</td>
 													<td class="px-4 py-2">{formatIsk(contract.price)}</td>
 													<td class="px-4 py-2 truncate max-w-xs" title={contract.locationName}>
-														{contract.locationName}
+														<a href={`https://evemaps.dotlan.net/station/${contract.locationName.replaceAll(" ", "_")}`} target="_blank" class="link">{contract.locationName}</a>
 													</td>
 												</tr>
 											{/each}
@@ -342,31 +349,32 @@
 <!--								</button>-->
 							</div>
 							<p class="text-gray-400 mb-4">
-								Explain how you send contracts and how to appraise them.
+								When you have the items in Jita IV 4, you can appraise them with <a href="https://janice.e-351.com/" class="link" target="_blank">janice</a>
+								and send a contract to Lerso Nardieu.
 							</p>
 							<div class="overflow-x-auto">
 								<table class="w-full table-auto">
 									<thead>
 									<tr class="border-b">
 										<th colspan="2" class="px-4 py-2 text-left">Item</th>
-										<th class="px-4 py-2 text-right">Days Held</th>
 										<th class="px-4 py-2 text-right">Quantity</th>
+										<th class="px-4 py-2 text-right">Days Held</th>
 									</tr>
 									</thead>
 									<tbody>
 									{#each $page.data.pendingItems as item}
 										<tr class="">
-											<td class="px-4 py-2">
+											<td class="px-4 py-2 w-24">
 												<img src={`https://images.evetech.net/types/${item.typeId}/icon?size=32`} alt={item.typeName}
 														 class="w-8 h-8" />
 											</td>
 											<td class="px-4 py-2">{item.typeName}</td>
+											<td class="px-4 py-2 text-right">{formatValue(item.amount)}</td>
 											<td class="px-4 py-2 text-right">
 												<span class={getDaysClass(countDays(item.updated))}>
 													{countDays(item.updated)}
 												</span>
 											</td>
-											<td class="px-4 py-2 text-right">{formatValue(item.amount)}</td>
 										</tr>
 									{/each}
 									</tbody>
