@@ -80,11 +80,6 @@
 				return transactionType;
 		}
 	}
-
-	const logout = () => {
-		localStorage.removeItem('token-v1');
-		window.location.replace('/logistics');
-	};
 </script>
 
 <svelte:head>
@@ -240,7 +235,7 @@
 									You will receive contracts for the character that you're signed in with, and probably want to hand
 									those
 									items to your alts. We may add support for multiple characters in the future, but have no immediate
-									plans to do so. In the meantime you can <button class="link" on:click={logout}>log out</button> and then sign in again.
+									plans to do so.
 								</p>
 								<form class="space-y-4" on:submit|preventDefault={handleContractRequest}>
 									<div>
