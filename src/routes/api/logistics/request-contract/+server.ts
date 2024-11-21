@@ -46,6 +46,7 @@ export async function POST({ request, cookies }) {
 				pk: `requests`,
 				sk: `character#${characterId}`,
 				value: requestedValue,
+				characterId,
 				created: new Date().toISOString()
 			}
 		}));
