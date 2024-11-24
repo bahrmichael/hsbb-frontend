@@ -22,22 +22,24 @@ export async function load({ cookies, request, params }) {
 
 	const targetId = params.characterId;
 	if (!targetId) {
-		throw error(400, "Can't resolve characterId from path.");
+		throw error(400, 'Can\'t resolve characterId from path.');
 	}
 
 	const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
-			.send(new QueryCommand({ ExclusiveStartKey, ...{
+			.send(new QueryCommand({
+				ExclusiveStartKey, ...{
 					TableName: env.AWS_LOGISTICS_TABLE_NAME,
 					KeyConditionExpression: 'pk = :pk',
 					ExpressionAttributeValues: {
 						':pk': `character#${targetId}`
 					}
-				}}));
+				}
+			}));
 
 		return {
 			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items,
+			results: queryResponse.Items
 		};
 	}) ?? [];
 
@@ -46,14 +48,13 @@ export async function load({ cookies, request, params }) {
 		.filter((r: any) => r.amount !== 0)
 		.sort((a: any, b: any) => b.created - a.created);
 
-	const mostRecentRewardSk = (transactions
+	const mostRecentRewardDate = (transactions
 		.filter((r: any) => r.transactionType === 'reward')
-		.sort((a: any, b: any) => b.created - a.created)
-		.pop())?.sk ?? 'transaction#0';
+		.sort((a: any, b: any) => b.created - a.created)[0])?.created ?? 0;
 
 	const remainingContractCollateral = transactions
 		.filter((r: any) => r.transactionType.startsWith('contract'))
-		.filter((r: any) => r.sk > mostRecentRewardSk)
+		.filter((r: any) => r.created > mostRecentRewardDate)
 		.map((r: any) => r.amount)
 		.reduce((a: any, b: any) => a + b, 0);
 
@@ -62,10 +63,10 @@ export async function load({ cookies, request, params }) {
 	// @ts-ignore
 	const balance = transactions[0]?.balance ?? 0;
 
-	let name = 'Unknown'
+	let name = 'Unknown';
 	try {
 		const characters = (await axios.post(`https://esi.evetech.net/v3/universe/names`, [+targetId])).data
-			.filter((r: any) => r.category === "character") ?? {};
+			.filter((r: any) => r.category === 'character') ?? {};
 		name = characters[0].name;
 	} catch (e) {
 		// noop
@@ -90,20 +91,20 @@ export async function load({ cookies, request, params }) {
 			.map((r: any) => {
 				return {
 					...r,
-					price: 0,
-				}
+					price: 0
+				};
 			})
 	};
 }
 
-const getPaginatedResults = async(fn: any) => {
-	const EMPTY = Symbol("empty");
+const getPaginatedResults = async (fn: any) => {
+	const EMPTY = Symbol('empty');
 	const res = [];
 	for await (const lf of (async function* () {
 		let NextMarker = EMPTY;
 		let count = 0;
 		while (NextMarker || NextMarker === EMPTY) {
-			const {marker, results, count: ct} =
+			const { marker, results, count: ct } =
 				await fn(NextMarker !== EMPTY ? NextMarker : undefined, count);
 
 			yield* results;

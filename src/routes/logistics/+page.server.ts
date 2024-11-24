@@ -67,14 +67,13 @@ export async function load({ cookies, request }) {
 		.filter((r: any) => r.amount !== 0)
 			.sort((a: any, b: any) => b.created - a.created);
 
-	const mostRecentRewardSk = (transactions
+	const mostRecentRewardDate = (transactions
 		.filter((r: any) => r.transactionType === 'reward')
-		.sort((a: any, b: any) => b.created - a.created)
-		.pop())?.sk ?? 'transaction#0';
+		.sort((a: any, b: any) => b.created - a.created)[0])?.created ?? 0;
 
 	const remainingContractCollateral = transactions
 		.filter((r: any) => r.transactionType.startsWith('contract'))
-		.filter((r: any) => r.sk > mostRecentRewardSk)
+		.filter((r: any) => r.created > mostRecentRewardDate)
 		.map((r: any) => r.amount)
 		.reduce((a: any, b: any) => a + b, 0);
 
