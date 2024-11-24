@@ -3,6 +3,7 @@ import { decodeJwt } from '$lib/decode-jwt.ts';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { GetCommand, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { env } from '$env/dynamic/private';
+import axios from 'axios';
 
 const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
@@ -50,6 +51,13 @@ export async function POST({ request, cookies }) {
 				created: new Date().toISOString()
 			}
 		}));
+		try {
+			await axios.post(env.DISCORD_WEBHOOK, {
+				content: `We received a new contract request.`
+			});
+		} catch {
+			console.error('Failed to send request to discord.')
+		}
 		return new Response(JSON.stringify({ result: 'created' }), { status: 200 });
 	}
 }
