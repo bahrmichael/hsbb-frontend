@@ -41,6 +41,27 @@ export async function load({ cookies, request, params }) {
 		};
 	}) ?? [];
 
+	const transactions = records
+		.filter((r: any) => r.sk.startsWith('transaction#'))
+		.filter((r: any) => r.amount !== 0)
+		.sort((a: any, b: any) => b.created - a.created);
+
+	const mostRecentRewardSk = (transactions
+		.filter((r: any) => r.transactionType === 'reward')
+		.sort((a: any, b: any) => b.created - a.created)
+		.pop())?.sk ?? 'transaction#0';
+
+	const remainingContractCollateral = transactions
+		.filter((r: any) => r.transactionType.startsWith('contract'))
+		.filter((r: any) => r.sk > mostRecentRewardSk)
+		.map((r: any) => r.amount)
+		.reduce((a: any, b: any) => a + b, 0);
+
+	const outstandingContracts = records.find((r: any) => r.sk.startsWith('outstandingContracts'))?.contracts ?? [];
+
+	// @ts-ignore
+	const balance = transactions[0]?.balance ?? 0;
+
 	let name = 'Unknown'
 	try {
 		const characters = (await axios.post(`https://esi.evetech.net/v3/universe/names`, [+targetId])).data
@@ -56,7 +77,11 @@ export async function load({ cookies, request, params }) {
 		characterName: 'Admin',
 		token,
 		iat,
-		records: records.filter((r: any) => !r.sk.startsWith('item#')),
+		records: records.filter((r: any) => !r.sk.startsWith('outstandingContracts') && !r.sk.startsWith('item#') && !r.sk.startsWith('transaction#') && !r.sk.startsWith('contract')),
+		outstandingContracts,
+		transactions,
+		remainingContractCollateral,
+		balance,
 		name,
 		pendingItems: records
 			.filter((r: any) => r.sk.startsWith('item#'))

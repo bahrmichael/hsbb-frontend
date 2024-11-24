@@ -52,6 +52,36 @@ export async function DELETE({ url, cookies }) {
 		}));
 	}
 
+	const outs = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+		const queryResponse = await ddb
+			.send(new QueryCommand({
+				ExclusiveStartKey, ...{
+					TableName: env.AWS_LOGISTICS_TABLE_NAME,
+					KeyConditionExpression: 'pk = :pk',
+					ExpressionAttributeValues: {
+						':pk': `out`
+					}
+				}
+			}));
+
+		return {
+			marker: queryResponse.LastEvaluatedKey,
+			results: queryResponse.Items
+		};
+	}) ?? [];
+
+	for (const { pk, sk, characterId } of outs) {
+		if (characterId === +characterIdParam) {
+			await ddb.send(new DeleteCommand({
+				TableName: env.AWS_LOGISTICS_TABLE_NAME,
+				Key: {
+					pk,
+					sk
+				}
+			}));
+		}
+	}
+
 	return new Response(null, { status: 200 });
 }
 

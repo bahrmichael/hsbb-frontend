@@ -76,6 +76,10 @@
 		switch (transactionType) {
 			case 'contractOut':
 				return 'Contract accepted';
+			case 'contractIn':
+				return 'Contract returned';
+			case 'reward':
+				return 'Reward';
 			default:
 				return transactionType;
 		}
@@ -175,13 +179,16 @@
 								<div class="mb-4">
 									<div class="flex justify-between items-center mb-4">
 										<h2 class="text-xl font-semibold">Your Balance: <span
-											class="text-green-600">{formatIsk($page.data.balance)}</span> (<span
+											class={$page.data.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk($page.data.balance)}</span> (<span
 											class="text-blue-400">{formatIsk($page.data.remainingContractCollateral)}</span> Collateral)</h2>
 										<!--										<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
 										<!--											Export to CSV-->
 										<!--										</button>-->
 									</div>
 								</div>
+								{#if $page.data.balance < 0}
+									<p class="mb-4">Your balance may be negative if the collateral for returned items was higher than the recent reward plus collateral for received items.</p>
+								{/if}
 								{#if $page.data.transactions && $page.data.transactions.length > 0}
 									<p class="text-gray-400 mb-4">
 										Here are your recent transactions:
@@ -192,8 +199,8 @@
 											<tr class="border-b">
 												<th class="px-4 py-2 text-left">Description</th>
 												<th class="px-4 py-2 text-left">Date</th>
-												<th class="px-4 py-2 text-left">Amount</th>
-												<th class="px-4 py-2 text-left">Balance</th>
+												<th class="px-4 py-2 text-right">Amount</th>
+												<th class="px-4 py-2 text-right">Balance</th>
 											</tr>
 											</thead>
 											<tbody>

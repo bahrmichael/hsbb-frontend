@@ -8,6 +8,7 @@
 			method: 'DELETE'
 		});
 		alert('Done!');
+		window.location.replace('/logistics-admin');
 	}
 
 
@@ -15,6 +16,19 @@
 		const today = new Date();
 		const timeDiff = Math.abs(today.getTime() - new Date(date).getTime());
 		return Math.ceil(timeDiff / (1000 * 3600 * 24));
+	}
+
+	function mapTransactionType(transactionType: string) {
+		switch (transactionType) {
+			case 'contractOut':
+				return 'Contract accepted';
+			case 'contractIn':
+				return 'Contract returned';
+			case 'reward':
+				return 'Reward';
+			default:
+				return transactionType;
+		}
 	}
 
 	function atLeast7Days(item: { updated: Date }) {
@@ -67,11 +81,21 @@
 	<Navbar />
 	<main class="min-h-screen p-4">
 		<div class="space-y-4">
-			<h2 class="px-6 text-2xl font-bold">Overview for {$page.data.name}</h2>
+			<h2 class="text-2xl font-bold">Overview for {$page.data.name}</h2>
 			<div>
-				<div class="flex gap-4">
-					<!-- Request Form - Left Third -->
-
+				<div class="w-3/3">
+					<div class="flex gap-4">
+						<!-- Request Form - Left Third -->
+						<div class="flex justify-between items-center mb-4">
+							<h2 class="text-xl font-semibold">Balance: <span
+								class={$page.data.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk($page.data.balance)}</span> (<span
+								class="text-blue-400">{formatIsk($page.data.remainingContractCollateral)}</span> Collateral)</h2>
+							<!--										<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
+							<!--											Export to CSV-->
+							<!--										</button>-->
+						</div>
+					</div>
+					<div>Outstanding contracts: {$page.data.outstandingContracts?.length ?? 0}</div>
 
 					<!-- Contracts Table - Right Two Thirds -->
 					<div class="w-3/3">
@@ -110,6 +134,37 @@
 					</div>
 				</div>
 			</div>
+
+			{#if $page.data.transactions && $page.data.transactions.length > 0}
+				<div class="overflow-x-auto">
+					<table class="w-full table-auto">
+						<thead>
+						<tr class="border-b">
+							<th class="px-4 py-2 text-left">Description</th>
+							<th class="px-4 py-2 text-left">Date</th>
+							<th class="px-4 py-2 text-right">Amount</th>
+							<th class="px-4 py-2 text-right">Balance</th>
+						</tr>
+						</thead>
+						<tbody>
+						{#each $page.data.transactions as t}
+							<tr class="">
+								<td class="px-4 py-2">{mapTransactionType(t.transactionType)}</td>
+								<td class="px-4 py-2">{new Date(t.created).toLocaleDateString()}</td>
+								<td class="px-4 py-2 text-right"><span
+									class={t.amount >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk(t.amount)}</span></td>
+								<td class="px-4 py-2 text-right"><span
+									class={t.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk(t.balance)}</span>
+								</td>
+							</tr>
+						{/each}
+						</tbody>
+					</table>
+				</div>
+			{:else}
+				<p class="text-gray-400">No transactions yet.</p>
+			{/if}
+
 
 			<div>
 
