@@ -22,6 +22,13 @@
 		alert('Request received. You\'re now in the queue!');
 	};
 
+	const handlePayoutRequest = async () => {
+		await fetch(`/api/logistics/request-payout/`, {
+			method: 'POST'
+		});
+		alert('Request received!');
+	};
+
 	function handleLogin() {
 		window.location.replace(`https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri=${encodeURIComponent(`https://highsec.evebuyback.com/callback`)}&client_id=7817dc406c90427db9d3570bb3cc495b&state=nah`);
 	}
@@ -80,6 +87,8 @@
 				return 'Contract returned';
 			case 'reward':
 				return 'Reward';
+			case 'payout':
+				return 'Payout';
 			default:
 				return transactionType;
 		}
@@ -179,15 +188,26 @@
 								<div class="mb-4">
 									<div class="flex justify-between items-center mb-4">
 										<h2 class="text-xl font-semibold">Your Balance: <span
-											class={$page.data.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk($page.data.balance)}</span> (<span
-											class="text-blue-400">{formatIsk($page.data.remainingContractCollateral)}</span> Collateral)</h2>
+											class={$page.data.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk($page.data.balance)}</span>
+											(<span
+												class="text-blue-400">{formatIsk($page.data.remainingContractCollateral)}</span> Collateral)
+										</h2>
 										<!--										<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
 										<!--											Export to CSV-->
 										<!--										</button>-->
+										<button
+											type="submit"
+											class="bg-blue-600 text-white px-4 py-2 rounded-md transition-colors {($page.data.hasPayoutRequest || $page.data.balance <= 0) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}"
+											disabled={$page.data.hasPayoutRequest || $page.data.balance <= 0}
+											on:click={handlePayoutRequest}
+										>
+											Request payout
+										</button>
 									</div>
 								</div>
 								{#if $page.data.balance < 0}
-									<p class="mb-4">Your balance may be negative if the collateral for returned items was higher than the recent reward plus collateral for received items.</p>
+									<p class="mb-4">Your balance may be negative if the collateral for returned items was higher than the
+										recent reward plus collateral for received items.</p>
 								{/if}
 								{#if $page.data.transactions && $page.data.transactions.length > 0}
 									<p class="text-gray-400 mb-4">
@@ -318,7 +338,8 @@
 										</table>
 									</div>
 								{:else}
-									<p class="text-gray-400">There are no outstanding contracts. You can request a new contract on the left. It may take up to an hour for changes to appear here.</p>
+									<p class="text-gray-400">There are no outstanding contracts. You can request a new contract on the
+										left. It may take up to an hour for changes to appear here.</p>
 								{/if}
 							</div>
 						</div>
@@ -397,7 +418,8 @@
 									</table>
 								</div>
 							{:else}
-								No items held. Please request a contract, or accept an outstanding one. It may take up to an hour for changes to appear here.
+								No items held. Please request a contract, or accept an outstanding one. It may take up to an hour for
+								changes to appear here.
 							{/if}
 						</div>
 					</div>

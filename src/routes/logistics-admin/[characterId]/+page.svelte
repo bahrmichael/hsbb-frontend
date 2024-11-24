@@ -26,6 +26,8 @@
 				return 'Contract returned';
 			case 'reward':
 				return 'Reward';
+			case 'payout':
+				return 'Payout';
 			default:
 				return transactionType;
 		}

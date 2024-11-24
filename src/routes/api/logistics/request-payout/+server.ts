@@ -19,8 +19,8 @@ export async function POST({ cookies }) {
 		TableName: env.AWS_LOGISTICS_TABLE_NAME,
 		KeyConditionExpression: `pk = :pk and begins_with(sk, :sk)`,
 		ExpressionAttributeValues: {
-			pk: `character#${characterId}`,
-			sk: `transaction#`
+			':pk': `character#${characterId}`,
+			':sk': 'transaction#'
 		},
 		ScanIndexForward: false
 	}))).Items ?? [];
@@ -35,10 +35,10 @@ export async function POST({ cookies }) {
 	await ddb.send(new PutCommand({
 		TableName: env.AWS_LOGISTICS_TABLE_NAME,
 		Item: {
-			pk: `payoutRequest`,
+			pk: `payoutRequests`,
 			sk: `character#${characterId}`,
-			value: balance,
-			create: new Date(),
+			characterId,
+			create: new Date().toISOString(),
 		},
 	}));
 

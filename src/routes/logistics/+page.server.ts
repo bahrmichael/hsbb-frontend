@@ -94,12 +94,21 @@ export async function load({ cookies, request }) {
 		}
 	}))).Item;
 
+	const existingPayoutRequest = (await ddb.send(new GetCommand({
+		TableName: env.AWS_LOGISTICS_TABLE_NAME,
+		Key: {
+			pk: `payoutRequests`,
+			sk: `character#${characterId}`
+		}
+	}))).Item;
+
 	return {
 		characterId,
 		characterName: name,
 		token,
 		iat,
 		hasContractRequest: !!existingContractRequest,
+		hasPayoutRequest: !!existingPayoutRequest,
 		balance,
 		transactions,
 		remainingContractCollateral,

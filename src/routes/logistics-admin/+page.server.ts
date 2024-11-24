@@ -20,7 +20,7 @@ export async function load({ cookies, request }) {
 		throw error(403, 'Forbidden');
 	}
 
-	const requests = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+	const contractRequests = await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
 			.send(new QueryCommand({
 				ExclusiveStartKey, ...{
@@ -38,7 +38,43 @@ export async function load({ cookies, request }) {
 		};
 	}) ?? [];
 
-	requests.sort((a: any, b: any) => a.created - b.created);
+	contractRequests.sort((a: any, b: any) => a.created - b.created);
+
+	const payoutRequests = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+		const queryResponse = await ddb
+			.send(new QueryCommand({
+				ExclusiveStartKey, ...{
+					TableName: env.AWS_LOGISTICS_TABLE_NAME,
+					KeyConditionExpression: 'pk = :pk',
+					ExpressionAttributeValues: {
+						':pk': `payoutRequests`
+					}
+				}
+			}));
+
+		return {
+			marker: queryResponse.LastEvaluatedKey,
+			results: queryResponse.Items
+		};
+	}) ?? [];
+
+	payoutRequests.sort((a: any, b: any) => a.created - b.created);
+
+	for (const payoutRequest of payoutRequests) {
+		const rewards = ((await ddb.send(new QueryCommand({
+			TableName: env.AWS_LOGISTICS_TABLE_NAME,
+			KeyConditionExpression: `pk = :pk and begins_with(sk, :sk)`,
+			FilterExpression: 'transactionType = :r',
+			ExpressionAttributeValues: {
+				':pk': `character#${payoutRequest.characterId}`,
+				':sk': 'transaction#',
+				':r': 'reward'
+			},
+			ScanIndexForward: false
+		}))).Items ?? []).sort((a: any, b: any) => b.created - a.created);
+
+		payoutRequest.value = rewards[0]?.balance ?? 0;
+	}
 
 	const outs = await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
@@ -58,19 +94,11 @@ export async function load({ cookies, request }) {
 		};
 	}) ?? [];
 
-
-	const mr = requests.map((c: any) => {
-		return {
-			...c,
-			// todo: after deploying new version where we set the characterId on the request, remove this
-			characterId: +(c.sk.split('#').pop() ?? -1)
-		};
-	});
-
 	// concat two arrays
 	const characterIds: number[] = [];
 	characterIds.push(...outs.map((o: any) => o.characterId));
-	characterIds.push(...mr.map((o: any) => o.characterId));
+	characterIds.push(...contractRequests.map((o: any) => o.characterId));
+	characterIds.push(...payoutRequests.map((o: any) => o.characterId));
 
 	const uniqueCharacterIds = [...new Set(characterIds)];
 
@@ -83,7 +111,8 @@ export async function load({ cookies, request }) {
 		characterName: name,
 		token,
 		iat,
-		requests: mr,
+		contractRequests,
+		payoutRequests,
 		characters
 	};
 }

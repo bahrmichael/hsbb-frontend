@@ -10,8 +10,15 @@
 		await fetch(`/api/logistics/delete-request/?characterId=${characterId}`, {
 			method: 'DELETE'
 		});
-		requests = requests.filter((r) => r.characterId !== characterId);
+		alert('Done');
 	};
+
+	async function completePayoutRequest(characterId: number, value: number) {
+		await fetch(`/api/logistics/complete-payout-request/?characterId=${characterId}&value=${value}`, {
+			method: 'POST'
+		});
+		alert('Done');
+	}
 
 	const formatIsk = (value: number) => {
 		return formatValue(value) + ' ISK';
@@ -49,7 +56,7 @@
 	<Navbar />
 	<main class="min-h-screen p-4">
 		<div class="space-y-4">
-			<h2 class="px-6 text-2xl font-bold">Requests</h2>
+			<h2 class="px-6 text-2xl font-bold">Contract Requests</h2>
 			<div>
 				<div class="flex gap-4">
 					<!-- Request Form - Left Third -->
@@ -67,13 +74,13 @@
 									</tr>
 									</thead>
 									<tbody>
-									{#each $page.data.requests as r}
+									{#each $page.data.contractRequests as r}
 										<tr class="">
 											<td
 												class="px-4 py-2">{$page.data.characters.find((c) => c.id === r.characterId)?.name ?? r.characterId}</td>
 											<td class="px-4 py-2 text-right">{formatIsk(r.value)}</td>
 											<td class="px-4 py-2">
-												<button class="btn" on:click={() => deleteContractRequest(r.characterId)}>Clear</button>
+												<button class="btn btn-primary" on:click={() => deleteContractRequest(r.characterId)}>Done</button>
 											</td>
 										</tr>
 									{/each}
@@ -85,6 +92,42 @@
 				</div>
 			</div>
 			<!-- More dashboard content will go here -->
+
+			<h2 class="px-6 text-2xl font-bold">Payout Requests</h2>
+			<div>
+				<div class="flex gap-4">
+					<!-- Request Form - Left Third -->
+
+					<!-- Contracts Table - Right Two Thirds -->
+					<div class="w-3/3">
+						<div class="rounded-lg p-6">
+							<div class="overflow-x-auto">
+								<table class="w-full table-auto">
+									<thead>
+									<tr class="border-b">
+										<th class="px-4 py-2 text-left">Name</th>
+										<th class="px-4 py-2 text-right">Value</th>
+										<th class="px-4 py-2 text-right"></th>
+									</tr>
+									</thead>
+									<tbody>
+									{#each $page.data.payoutRequests as r}
+										<tr class="">
+											<td
+												class="px-4 py-2">{$page.data.characters.find((c) => c.id === r.characterId)?.name ?? r.characterId}</td>
+											<td class="px-4 py-2 text-right">{Math.floor(r.value)} ({formatIsk(r.value)})</td>
+											<td class="px-4 py-2">
+												<button class="btn btn-primary" on:click={() => completePayoutRequest(r.characterId, Math.floor(r.value))}>Done</button>
+											</td>
+										</tr>
+									{/each}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
 
 			<h2 class="px-6 text-2xl font-bold">Characters</h2>
