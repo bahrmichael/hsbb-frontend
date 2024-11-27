@@ -3,6 +3,10 @@
 	import Footer from '$lib/Footer.svelte';
 
 	import { page } from '$app/stores';
+	import ItemsTable from '$lib/logistics/ItemsTable.svelte';
+	import Transactions from '$lib/logistics/Transactions.svelte';
+	import { formatIsk } from '$lib/isk-formatting.ts';
+	import { atLeast7Days } from '$lib/logistics/utilities.ts';
 
 	const contractValues = [
 		2_000_000_000,
@@ -31,67 +35,6 @@
 
 	function handleLogin() {
 		window.location.replace(`https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri=${encodeURIComponent(`https://highsec.evebuyback.com/callback`)}&client_id=7817dc406c90427db9d3570bb3cc495b&state=nah`);
-	}
-
-	function countDays(date: Date): number {
-		const today = new Date();
-		const timeDiff = Math.abs(today.getTime() - new Date(date).getTime());
-		return Math.ceil(timeDiff / (1000 * 3600 * 24));
-	}
-
-	function atLeast7Days(item: { updated: Date }) {
-		return countDays(item.updated) >= 7;
-	}
-
-	function exportToCsv() {
-		alert('This is not implemented yet. Just ping Lerso on Discord.');
-	}
-
-	const getDaysClass = (days: number) => {
-		if (days >= 14) return 'text-red-600 font-semibold';
-		if (days >= 7) return 'text-yellow-600 font-semibold';
-		return 'text-green-600 font-semibold';
-	};
-
-	const formatIsk = (value: number) => {
-		return formatValue(value) + ' ISK';
-	};
-
-	function toF(v: number, d: number): string {
-		if (v % 1 == 0) {
-			return `${v}`;
-		} else {
-			return v.toFixed(d);
-		}
-	}
-
-	const formatValue = (value: number) => {
-		const v = Math.abs(value);
-		if (v < 1000) {
-			return toF(value, 2);
-		}
-		if (v < 1_000_000) {
-			return toF(value / 1000, 2) + 'k';
-		}
-		if (v < 1_000_000_000) {
-			return toF(value / 1_000_000, 2) + 'm';
-		}
-		return toF(value / 1_000_000_000, 2) + 'b';
-	};
-
-	function mapTransactionType(transactionType: string) {
-		switch (transactionType) {
-			case 'contractOut':
-				return 'Contract accepted';
-			case 'contractIn':
-				return 'Contract returned';
-			case 'reward':
-				return 'Reward';
-			case 'payout':
-				return 'Payout';
-			default:
-				return transactionType;
-		}
 	}
 </script>
 
@@ -188,9 +131,9 @@
 								<div class="mb-4">
 									<div class="flex justify-between items-center mb-4">
 										<h2 class="text-xl font-semibold">Your Balance: <span
-											class={$page.data.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk($page.data.balance)}</span>
+											class={$page.data.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk($page.data.balance, true)}</span>
 											(<span
-												class="text-blue-400">{formatIsk($page.data.remainingContractCollateral)}</span> Collateral)
+												class="text-blue-400">{formatIsk($page.data.remainingContractCollateral, true)}</span> Collateral)
 										</h2>
 										<!--										<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
 										<!--											Export to CSV-->
@@ -214,29 +157,7 @@
 										Here are your recent transactions:
 									</p>
 									<div class="overflow-x-auto">
-										<table class="w-full table-auto">
-											<thead>
-											<tr class="border-b">
-												<th class="px-4 py-2 text-left">Description</th>
-												<th class="px-4 py-2 text-left">Date</th>
-												<th class="px-4 py-2 text-right">Amount</th>
-												<th class="px-4 py-2 text-right">Balance</th>
-											</tr>
-											</thead>
-											<tbody>
-											{#each $page.data.transactions as t}
-												<tr class="">
-													<td class="px-4 py-2">{mapTransactionType(t.transactionType)}</td>
-													<td class="px-4 py-2">{new Date(t.created).toLocaleDateString()}</td>
-													<td class="px-4 py-2 text-right"><span
-														class={t.amount >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk(t.amount)}</span></td>
-													<td class="px-4 py-2 text-right"><span
-														class={t.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk(t.balance)}</span>
-													</td>
-												</tr>
-											{/each}
-											</tbody>
-										</table>
+										<Transactions transactions={$page.data.transactions} />
 									</div>
 								{:else}
 									<p class="text-gray-400">Your transactions will appear here.</p>
@@ -390,32 +311,9 @@
 							</p>
 							{#if $page.data.pendingItems?.length > 0 }
 								<div class="overflow-x-auto">
-									<table class="w-full table-auto">
-										<thead>
-										<tr class="border-b">
-											<th colspan="2" class="px-4 py-2 text-left">Item</th>
-											<th class="px-4 py-2 text-right">Quantity</th>
-											<th class="px-4 py-2 text-right">Days Held</th>
-										</tr>
-										</thead>
-										<tbody>
-										{#each $page.data.pendingItems as item}
-											<tr class="">
-												<td class="px-4 py-2 w-24">
-													<img src={`https://images.evetech.net/types/${item.typeId}/icon?size=32`} alt={item.typeName}
-															 class="w-8 h-8" />
-												</td>
-												<td class="px-4 py-2">{item.typeName}</td>
-												<td class="px-4 py-2 text-right">{formatValue(item.amount)}</td>
-												<td class="px-4 py-2 text-right">
-												<span class={getDaysClass(countDays(item.updated))}>
-													{countDays(item.updated)}
-												</span>
-												</td>
-											</tr>
-										{/each}
-										</tbody>
-									</table>
+									<div class="overflow-x-auto">
+										<ItemsTable items={$page.data.pendingItems} />
+									</div>
 								</div>
 							{:else}
 								No items held. Please request a contract, or accept an outstanding one. It may take up to an hour for
