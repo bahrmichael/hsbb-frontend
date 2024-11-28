@@ -21,7 +21,7 @@
 	<tr class="border-b">
 		<th colspan="2" class="px-4 py-2 text-left">Item</th>
 		<th class="px-4 py-2 text-right">Quantity</th>
-		<th class="px-4 py-2 text-right">Volume (total)</th>
+		<th class="px-4 py-2 text-right">Volume ({formatValue(roundedTotalVolume, true)} m3 total)</th>
 		<th class="px-4 py-2 text-right">Days Held</th>
 	</tr>
 	</thead>

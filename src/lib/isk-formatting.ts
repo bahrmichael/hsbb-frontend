@@ -1,5 +1,5 @@
 export const formatIsk = (value: number, longVersion = false) => {
-	return formatValue(value, longVersion) + ' ISK';
+	return formatValue(Math.floor(value), longVersion) + ' ISK';
 };
 
 function toF(v: number, d: number): string {

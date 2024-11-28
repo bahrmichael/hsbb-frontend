@@ -39,6 +39,7 @@ export async function POST({ cookies }) {
 			sk: `character#${characterId}`,
 			characterId,
 			create: new Date().toISOString(),
+			version: '2'
 		},
 	}));
 

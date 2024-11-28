@@ -4,8 +4,9 @@
 
 	export let transactions: {
 		transactionType: string,
-		balance: number,
 		amount: number,
+		balance?: number,
+		collateral?: number,
 		created: Date,
 	}[] = [];
 </script>
@@ -16,6 +17,7 @@
 		<th class="px-4 py-2 text-left">Description</th>
 		<th class="px-4 py-2 text-left">Date</th>
 		<th class="px-4 py-2 text-right">Amount</th>
+		<th class="px-4 py-2 text-right">Collateral</th>
 		<th class="px-4 py-2 text-right">Balance</th>
 	</tr>
 	</thead>
@@ -26,8 +28,17 @@
 			<td class="px-4 py-2">{new Date(t.created).toLocaleString()}</td>
 			<td class="px-4 py-2 text-right"><span
 				class={t.amount >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk(t.amount, true)}</span></td>
-			<td class="px-4 py-2 text-right"><span
-				class={t.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk(t.balance, true)}</span>
+			<td
+				class="px-4 py-2 text-right">
+				{#if t.collateral !== undefined}
+					<span class={t.collateral >= 0 ? "text-blue-400" : "text-red-400"}>{formatIsk(t.collateral, true)}</span>
+				{/if}
+			</td>
+			<td
+				class="px-4 py-2 text-right">
+				{#if t.balance !== undefined}
+					<span class={t.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk(t.balance, true)}</span>
+				{/if}
 			</td>
 		</tr>
 	{/each}

@@ -53,6 +53,7 @@ export async function POST({ url, cookies }) {
 			amount,
 			balance: newBalance,
 			created: Date.now(),
+			version: '2'
 		}
 	}));
 

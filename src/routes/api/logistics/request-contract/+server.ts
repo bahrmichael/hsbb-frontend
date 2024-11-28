@@ -48,7 +48,8 @@ export async function POST({ request, cookies }) {
 				sk: `character#${characterId}`,
 				value: requestedValue,
 				characterId,
-				created: new Date().toISOString()
+				created: new Date().toISOString(),
+				version: '2'
 			}
 		}));
 		try {

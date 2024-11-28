@@ -6,7 +6,14 @@ import { error } from '@sveltejs/kit';
 
 const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
-async function getItemInfo(typeId: number) {
+export interface TypeInfo {
+	type_id: number
+	name: string
+	packaged_volume: number
+	volume: number
+}
+
+async function getItemInfo(typeId: number): Promise<TypeInfo> {
 	const existingInfo = (await ddb.send(new GetCommand({
 		TableName: env.AWS_LOGISTICS_TABLE_NAME,
 		Key: {
@@ -15,20 +22,29 @@ async function getItemInfo(typeId: number) {
 		}
 	}))).Item;
 	if (existingInfo) {
-		return existingInfo;
+		return existingInfo as TypeInfo;
 	}
 
 	const d = (await axios.get(`https://esi.evetech.net/latest/universe/types/${typeId}/`)).data;
+
+	const typeInfo: TypeInfo = {
+		type_id: d.type_id,
+		name: d.name,
+		packaged_volume: d.packaged_volume,
+		volume: d.volume,
+	}
+
 	await ddb.send(new PutCommand({
 		TableName: env.AWS_LOGISTICS_TABLE_NAME,
 		Item: {
-			...d,
+			...typeInfo,
 			pk: `item`,
 			sk: `typeId#${typeId}`,
+			version: '2'
 		}
 	}));
 
-	return d;
+	return typeInfo;
 }
 
 async function getLocationName(locationId: number) {
@@ -52,6 +68,7 @@ async function getLocationName(locationId: number) {
 			pk: `location`,
 			sk: `${locationId}`,
 			name: station.data.name,
+			version: '2'
 		},
 	}));
 
@@ -65,8 +82,13 @@ export async function loadCharacterData(characterId: number) {
 				ExclusiveStartKey, ...{
 					TableName: env.AWS_LOGISTICS_TABLE_NAME,
 					KeyConditionExpression: 'pk = :pk',
+					FilterExpression: '#version = :v',
 					ExpressionAttributeValues: {
-						':pk': `character#${characterId}`
+						':pk': `character#${characterId}`,
+						':v': '2'
+					},
+					ExpressionAttributeNames: {
+						'#version': 'version',
 					}
 				}
 			}));
@@ -79,26 +101,20 @@ export async function loadCharacterData(characterId: number) {
 
 	const transactions = records
 		.filter((r: any) => r.sk.startsWith('transaction#'))
-		.filter((r: any) => r.amount !== 0)
 		.sort((a: any, b: any) => b.created - a.created);
 
-	const mostRecentRewardDate = (transactions
-		.filter((r: any) => r.transactionType === 'reward')
-		.sort((a: any, b: any) => b.created - a.created)[0])?.created ?? 0;
-
 	const remainingContractCollateral = transactions
-		.filter((r: any) => r.transactionType.startsWith('contract'))
-		.filter((r: any) => r.created > mostRecentRewardDate)
-		.map((r: any) => r.amount)
-		.reduce((a: any, b: any) => a + b, 0);
+		.filter((r: any) => r.transactionType.startsWith('contract') || r.transactionType === 'collateralTransfer')
+		.sort((a: any, b: any) => b.created - a.created)[0]?.collateral ?? 0;
 
 	const outstandingContracts = records.find((r: any) => r.sk === 'outstandingContracts')?.contracts ?? [];
 	for (const c of outstandingContracts ) {
 		c.locationName = await getLocationName(c.start_location_id);
 	}
 
-	// @ts-ignore
-	const balance = transactions[0]?.balance ?? 0;
+	const balance: number = transactions
+		.filter((r: any) => r.transactionType === 'reward' || r.transactionType === 'collateralTransfer' || r.transactionType === 'payout')
+		.sort((a: any, b: any) => b.created - a.created)[0]?.balance ?? 0;
 
 	let name = 'Unknown';
 	try {
@@ -115,10 +131,9 @@ export async function loadCharacterData(characterId: number) {
 		.filter((r: any) => r.amount !== 0)
 		.sort((a: any, b: any) => a.typeName.localeCompare(b.typeName));
 
-	const typeIds: number[] = [...new Set(pendingItems.map(i => i.typeId))] as number[];
 	const itemInfoPromises: Promise<any>[] = [];
-	for (const typeId of typeIds) {
-		itemInfoPromises.push(getItemInfo(typeId));
+	for (const i of pendingItems) {
+		itemInfoPromises.push(getItemInfo(i.typeId));
 	}
 
 	const itemInfos = await Promise.all(itemInfoPromises);
