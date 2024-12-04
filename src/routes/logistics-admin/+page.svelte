@@ -77,7 +77,8 @@
 									{#each $page.data.contractRequests as r}
 										<tr class="">
 											<td
-												class="px-4 py-2">{$page.data.characters.find((c) => c.id === r.characterId)?.name ?? r.characterId}</td>
+												class="px-4 py-2"><a href={`/logistics-admin/${r.characterId}`} class="link">{$page.data.characters.find((c) => c.id === r.characterId)?.name ?? r.characterId}</a>
+											</td>
 											<td class="px-4 py-2 text-right">{formatIsk(r.value)}</td>
 											<td class="px-4 py-2">
 												<button class="btn btn-primary" on:click={() => deleteContractRequest(r.characterId)}>Done</button>
@@ -114,7 +115,8 @@
 									{#each $page.data.payoutRequests as r}
 										<tr class="">
 											<td
-												class="px-4 py-2">{$page.data.characters.find((c) => c.id === r.characterId)?.name ?? r.characterId}</td>
+												class="px-4 py-2"><a href={`/logistics-admin/${r.characterId}`} class="link">{$page.data.characters.find((c) => c.id === r.characterId)?.name ?? r.characterId}</a>
+											</td>
 											<td class="px-4 py-2 text-right">{Math.floor(r.value)} ({formatIsk(r.value)})</td>
 											<td class="px-4 py-2">
 												<button class="btn btn-primary" on:click={() => completePayoutRequest(r.characterId, Math.floor(r.value))}>Done</button>

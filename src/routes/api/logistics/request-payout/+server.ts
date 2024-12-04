@@ -38,17 +38,17 @@ export async function POST({ cookies }) {
 			pk: `payoutRequests`,
 			sk: `character#${characterId}`,
 			characterId,
-			create: new Date().toISOString(),
+			create: new Date().getTime(),
 			version: '2'
 		},
 	}));
 
 	try {
-		await axios.post(env.DISCORD_WEBHOOK, {
+		await axios.post(env.DISCORD_WEBHOOK!, {
 			content: `We received a new payout request.`
-		});
-	} catch {
-		console.error('Failed to send request to discord.')
+		}, { headers: { 'Content-Type': 'application/json' }});
+	} catch (e) {
+		console.error('Failed to send request to discord.', e)
 	}
 	return new Response(JSON.stringify({ result: 'created' }), { status: 200 });
 }

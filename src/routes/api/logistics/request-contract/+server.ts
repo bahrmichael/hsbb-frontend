@@ -48,16 +48,27 @@ export async function POST({ request, cookies }) {
 				sk: `character#${characterId}`,
 				value: requestedValue,
 				characterId,
-				created: new Date().toISOString(),
+				created: new Date().getTime(),
+				version: '2'
+			}
+		}));
+		await ddb.send(new PutCommand({
+			TableName: env.AWS_LOGISTICS_TABLE_NAME,
+			Item: {
+				pk: `participants`,
+				sk: `character#${characterId}`,
+				characterId,
+				created: new Date().getTime(),
+				timeToLive: Math.floor(new Date().getTime() / 1000 + 90 * 24 * 60 * 60),
 				version: '2'
 			}
 		}));
 		try {
-			await axios.post(env.DISCORD_WEBHOOK, {
+			await axios.post(env.DISCORD_WEBHOOK!, {
 				content: `We received a new contract request.`
-			});
-		} catch {
-			console.error('Failed to send request to discord.')
+			}, { headers: { 'Content-Type': 'application/json' }});
+		} catch (e) {
+			console.error('Failed to send request to discord.', e)
 		}
 		return new Response(JSON.stringify({ result: 'created' }), { status: 200 });
 	}

@@ -40,7 +40,7 @@ export async function load({ cookies, request }) {
 
 	contractRequests.sort((a: any, b: any) => a.created - b.created);
 
-	const payoutRequests = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+	const payoutRequests: any[] = await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
 			.send(new QueryCommand({
 				ExclusiveStartKey, ...{
@@ -76,7 +76,26 @@ export async function load({ cookies, request }) {
 		payoutRequest.value = rewards[0]?.balance ?? 0;
 	}
 
-	const outs = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+	const participants: {characterId: number}[] = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+		const queryResponse = await ddb
+			.send(new QueryCommand({
+				ExclusiveStartKey, ...{
+					TableName: env.AWS_LOGISTICS_TABLE_NAME,
+					KeyConditionExpression: 'pk = :pk',
+					ExpressionAttributeValues: {
+						':pk': `participants`
+					}
+				}
+			}));
+
+		return {
+			marker: queryResponse.LastEvaluatedKey,
+			results: queryResponse.Items
+		};
+	}) ?? [];
+
+	// todo: drop the outs once enough participant records have been added
+	const outs: {characterId: number}[] = await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
 			.send(new QueryCommand({
 				ExclusiveStartKey, ...{
@@ -94,11 +113,10 @@ export async function load({ cookies, request }) {
 		};
 	}) ?? [];
 
-	// concat two arrays
-	const characterIds: number[] = [];
-	characterIds.push(...outs.map((o: any) => o.characterId));
+	const characterIds: number[] = participants.map(p => p.characterId);
 	characterIds.push(...contractRequests.map((o: any) => o.characterId));
 	characterIds.push(...payoutRequests.map((o: any) => o.characterId));
+	characterIds.push(...outs.map((o: any) => o.characterId));
 
 	const uniqueCharacterIds = [...new Set(characterIds)];
 

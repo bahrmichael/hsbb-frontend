@@ -103,11 +103,12 @@
 									please reach out to us. If you collaterize your couriers properly, there should be no loss for you.
 								</p>
 								<div class="text-gray-400 mb-2">
-									We calculate your balance automatically by taking the difference between outgoing and incoming
-									collateral, and
-									adding the reward for returned items. The price of items may change between when you accept and create
-									a contract, but
-									our system accounts for that. Here are two examples:
+									We calculate your balance automatically by tracking rewards, payouts and by clearing collateral.
+									When you returned all items and have no more pending items, we clear the collateral by transferring
+									the remaining value to your balance. If you returned items for less ISK than you received them, we
+									add a positive amount to your balance. This amount will be paid out with your next payout request.
+
+									Here are two examples:
 									<ul class="m-4">
 										<li class="list-disc">You accept a contract for <span class="text-blue-400">10b ISK</span>, and
 											return it for <span class="text-blue-400">10b ISK</span>. You receive a 3% reward
