@@ -104,7 +104,7 @@ export async function loadCharacterData(characterId: number) {
 		.sort((a: any, b: any) => b.created - a.created);
 
 	const remainingContractCollateral = transactions
-		.filter((r: any) => r.transactionType.startsWith('contract') || r.transactionType === 'collateralTransfer')
+		.filter((r: any) => r.transactionType.startsWith('contract') || r.transactionType === 'collateralTransfer' || r.transactionType === 'itemsCleared')
 		.sort((a: any, b: any) => b.created - a.created)[0]?.collateral ?? 0;
 
 	const outstandingContracts = records.find((r: any) => r.sk === 'outstandingContracts')?.contracts ?? [];

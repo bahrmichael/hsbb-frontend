@@ -16,6 +16,8 @@ export function mapTransactionType(transactionType: string) {
 			return 'Payout';
 		case 'collateralTransfer':
 			return 'Collateral cleared';
+		case 'itemsCleared':
+			return 'Items cleared';
 		default:
 			return transactionType;
 	}
