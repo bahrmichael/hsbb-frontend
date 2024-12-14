@@ -55,6 +55,14 @@
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="text-xl font-semibold">Items Held</h2>
 				</div>
+				<p>
+					{#if $page.data.janiceCalc?.startsWith('https')}
+						<a href={$page.data.janiceCalc} target="_blank" class="text-blue-600 hover:text-blue-800">View on
+							Janice</a>
+					{:else}
+						Janice: {$page.data.janiceCalc ?? 'Unknown'}
+					{/if}
+				</p>
 				<div class="overflow-x-auto">
 					<ItemsTable items={$page.data.pendingItems} />
 				</div>
