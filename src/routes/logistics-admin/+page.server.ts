@@ -7,20 +7,8 @@ import { error } from '@sveltejs/kit';
 
 const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
-/** @type {import('./$types').PageServerLoad} */
-export async function load({ cookies, request }) {
-	const token = cookies.get('token-v1');
-	if (!token) {
-		throw error(401, 'Unauthorized');
-	}
-
-	const { characterId, name, iat } = await decodeJwt(token, request.url);
-
-	if (name !== 'Lerso Nardieu') {
-		throw error(403, 'Forbidden');
-	}
-
-	const contractRequests = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+async function getContractRequests() {
+	return await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
 			.send(new QueryCommand({
 				ExclusiveStartKey, ...{
@@ -37,10 +25,10 @@ export async function load({ cookies, request }) {
 			results: queryResponse.Items
 		};
 	}) ?? [];
+}
 
-	contractRequests.sort((a: any, b: any) => a.created - b.created);
-
-	const payoutRequests: any[] = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+async function getPayoutRequests() {
+	return await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
 			.send(new QueryCommand({
 				ExclusiveStartKey, ...{
@@ -56,8 +44,76 @@ export async function load({ cookies, request }) {
 			marker: queryResponse.LastEvaluatedKey,
 			results: queryResponse.Items
 		};
-	}) ?? [];
+	}) ?? []
+}
 
+async function getParticipants() {
+	return await getPaginatedResults(async (ExclusiveStartKey: any) => {
+		const queryResponse = await ddb
+			.send(new QueryCommand({
+				ExclusiveStartKey, ...{
+					TableName: env.AWS_LOGISTICS_TABLE_NAME,
+					KeyConditionExpression: 'pk = :pk',
+					ExpressionAttributeValues: {
+						':pk': `participants`
+					}
+				}
+			}));
+
+		return {
+			marker: queryResponse.LastEvaluatedKey,
+			results: queryResponse.Items
+		};
+	}) ?? [];
+}
+
+async function getOuts() {
+	return await getPaginatedResults(async (ExclusiveStartKey: any) => {
+		const queryResponse = await ddb
+			.send(new QueryCommand({
+				ExclusiveStartKey, ...{
+					TableName: env.AWS_LOGISTICS_TABLE_NAME,
+					KeyConditionExpression: 'pk = :pk',
+					ExpressionAttributeValues: {
+						':pk': `out`
+					}
+				}
+			}));
+
+		return {
+			marker: queryResponse.LastEvaluatedKey,
+			results: queryResponse.Items
+		};
+	}) ?? [];
+}
+
+/** @type {import('./$types').PageServerLoad} */
+export async function load({ cookies, request }) {
+	const token = cookies.get('token-v1');
+	if (!token) {
+		throw error(401, 'Unauthorized');
+	}
+
+	const { characterId, name, iat } = await decodeJwt(token, request.url);
+
+	if (name !== 'Lerso Nardieu') {
+		throw error(403, 'Forbidden');
+	}
+
+	const [contractRequests, payoutRequests, participants, outs] = await Promise.all([
+		getContractRequests(),
+		getPayoutRequests(),
+		getParticipants(),
+	// todo: drop the outs once enough participant records have been added
+		getOuts()
+	]);
+
+	// const contractRequests = await getContractRequests();
+	// const payoutRequests: any[] = await getPayoutRequests();
+	// const participants: {characterId: number}[] = await getParticipants();
+	// const outs: {characterId: number}[] = await getOuts();
+
+	contractRequests.sort((a: any, b: any) => a.created - b.created);
 	payoutRequests.sort((a: any, b: any) => a.created - b.created);
 
 	for (const payoutRequest of payoutRequests) {
@@ -75,43 +131,6 @@ export async function load({ cookies, request }) {
 
 		payoutRequest.value = rewards[0]?.balance ?? 0;
 	}
-
-	const participants: {characterId: number}[] = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-		const queryResponse = await ddb
-			.send(new QueryCommand({
-				ExclusiveStartKey, ...{
-					TableName: env.AWS_LOGISTICS_TABLE_NAME,
-					KeyConditionExpression: 'pk = :pk',
-					ExpressionAttributeValues: {
-						':pk': `participants`
-					}
-				}
-			}));
-
-		return {
-			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items
-		};
-	}) ?? [];
-
-	// todo: drop the outs once enough participant records have been added
-	const outs: {characterId: number}[] = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-		const queryResponse = await ddb
-			.send(new QueryCommand({
-				ExclusiveStartKey, ...{
-					TableName: env.AWS_LOGISTICS_TABLE_NAME,
-					KeyConditionExpression: 'pk = :pk',
-					ExpressionAttributeValues: {
-						':pk': `out`
-					}
-				}
-			}));
-
-		return {
-			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items
-		};
-	}) ?? [];
 
 	const characterIds: number[] = participants.map(p => p.characterId);
 	characterIds.push(...contractRequests.map((o: any) => o.characterId));
