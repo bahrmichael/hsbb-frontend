@@ -46,12 +46,15 @@
 	<Navbar />
 	<main class="min-h-screen p-4">
 		{#if $page.data.requiresSignIn}
-			<div class="max-w-2xl mx-auto space-y-6 text-center">
-				<h1 class="text-3xl font-bold">Welcome to the HSBB Logistics Program (Beta)</h1>
-				<p class="text-gray-600">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
-					labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-					laboris nisi ut aliquip ex ea commodo consequat.
+			<div class="max-w-2xl space-y-6">
+				<h1 class="text-3xl font-bold">Welcome to the HSBB Logistics Program</h1>
+				<p class="py-2">
+					With the HSBB Logistics program you can help us sending assets to Jita or Amarr (whichever is closer),
+					and profit while doing so. With HSBB becoming larger, we need to outsource more work. Creating couriers is one of those areas.
+					The ideal way to participate in this program is more about admin work (i.e. creating public couriers) and less about hauling items yourself.
+				</p>
+				<p>
+					Please pick a character you want to use for this program to get started. We only need a name, nothing more.
 				</p>
 				<button
 					on:click={handleLogin}
@@ -62,30 +65,31 @@
 			</div>
 		{:else}
 			<div class="space-y-4">
-				<h1 class="px-6 text-3xl font-bold">HSBB Logistics (Beta)</h1>
-				<p class="px-6">With the HSBB Logistics program you can help us move assets to <a
-					href="https://universe.eveonline.com/lore/jita-iv-moon-4-caldari-navy-assembly-plant" class="link">Jita</a>,
-					and profit while doing so. You
-					can request contracts of 2b to 20b ISK, and receive 3% of the value as a reward when the items have been
+				<h1 class="px-6 text-3xl font-bold">HSBB Logistics</h1>
+				<p class="px-6">
+					With the HSBB Logistics program you can help us sending assets to Jita or Amarr (whichever is closer),
+					and profit while doing so. With HSBB becoming larger, we need to outsource more work. Creating couriers is one of those areas.
+					The ideal way to participate in this program is more about admin work (i.e. creating public couriers) and less about hauling items yourself.
+				</p>
+				<p class="px-6">
+				</p>
+				<p class="px-6">
+					<b>How does it work?</b>
+					You can request contracts of 2b to 20b ISK, and receive 3% of the value as a reward when the items have been
 					delivered
-					to <a href="https://universe.eveonline.com/lore/jita-iv-moon-4-caldari-navy-assembly-plant"
-								class="link">Jita</a>. This should be enough so that you can use public couriers or hauling providers
-					while still making a
-					profit. That means you don't have to risk losing your own ship.</p>
-				<p class="px-6">Contracts will be scattered across New Eden, but we try to keep them somewhat close to Jita
-					(i.e. no Khanid or islands). You're free to reject
+					to Jita or Amarr (whichever is closer). This should be enough so that you can use public couriers or hauling providers
+					while still making a profit. That means you don't have to risk losing your own ship.</p>
+				<p class="px-6">Contracts will be scattered across New Eden, but limited to highsec mainland (i.e. no islands). You're free to reject
 					contracts, but that will move you to the end of the queue.</p>
 				<p class="px-6">The process is simple: <b>Firstly</b>, use the request form below to request contracts. You
 					should receive a
 					contract within a couple days, and have 7 days to accept it. The contract is priced at Jita Buy as collateral,
 					but
-					we expect you to return all items. <b>Secondly</b>, you move the items to <a
-						href="https://universe.eveonline.com/lore/jita-iv-moon-4-caldari-navy-assembly-plant" class="link">Jita</a>.
+					we expect you to return all items. <b>Secondly</b>, you move the items to Jita or Amarr (whichever is closer).
 					We recommend that you create public
 					couriers to get the best match of safety and pricing. Use our <a href="/jobs/couriers" class="link">public
 						data</a> to help with
-					pricing your couriers. <b>Finally</b>, when all the items have arrived in <a
-						href="https://universe.eveonline.com/lore/jita-iv-moon-4-caldari-navy-assembly-plant" class="link">Jita</a>
+					pricing your couriers. <b>Finally</b>, when all the items have arrived in to Jita or Amarr (whichever is closer)
 					contract them to <a href="https://evewho.com/character/93475128" class="link">Lerso Nardieu</a> and price
 					the contract at the Jita Buy value of all the items. Use the <a href="https://janice.e-351.com/" class="link">janice
 						appraisal</a>
