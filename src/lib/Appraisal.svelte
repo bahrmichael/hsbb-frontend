@@ -129,7 +129,7 @@
 			<textarea class="textarea textarea-bordered w-full" placeholder="Tritanium x10" rows="9"
 								bind:value={calculatorInput}></textarea>
 			<div class="flex justify-between">
-				{#if appraisalResult == null}
+				{#if appraisalResult == null || !!appraisalError}
 					<span class="text-sm text-base-content">Paste the items from your inventory above.</span>
 				{:else}
 					<span class="text-sm text-success">Appraisal succeeded. Scroll down to see the result.</span>
