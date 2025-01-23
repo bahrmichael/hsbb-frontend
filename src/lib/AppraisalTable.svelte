@@ -46,7 +46,7 @@
 					<dialog id={`modal-${item.typeId}`} class="modal">
 						<div class="modal-box text-neutral-content">
 							<h3 class="font-bold text-lg mb-4">Effective Rate</h3>
-							<p class="my-2">Some items diverge from our base rate of 90% Jita Buy. T1 Industrials for example are difficult to haul efficiently.</p>
+							<p class="my-2">Some items diverge from our base rate of {window.location.origin.includes('lowsec') ? '70' : '90'}% Jita Buy. T1 Industrials for example are difficult to haul efficiently.</p>
 							<p class="my-2">Below are the reasons why we price {item.typeName} at {item.effectiveRate}% Jita Buy.</p>
 							<div class="my-2">
 								<ul>
