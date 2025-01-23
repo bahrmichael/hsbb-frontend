@@ -50,8 +50,10 @@
 				<h1 class="text-3xl font-bold">Welcome to the HSBB Logistics Program</h1>
 				<p class="py-2">
 					With the HSBB Logistics program you can help us sending assets to Jita or Amarr (whichever is closer),
-					and profit while doing so. With HSBB becoming larger, we need to outsource more work. Creating couriers is one of those areas.
-					The ideal way to participate in this program is more about admin work (i.e. creating public couriers) and less about hauling items yourself.
+					and profit while doing so. With HSBB becoming larger, we need to outsource more work. Creating couriers is one
+					of those areas.
+					The ideal way to participate in this program is more about admin work (i.e. creating public couriers) and less
+					about hauling items yourself.
 				</p>
 				<p>
 					Please pick a character you want to use for this program to get started. We only need a name, nothing more.
@@ -68,8 +70,10 @@
 				<h1 class="px-6 text-3xl font-bold">HSBB Logistics</h1>
 				<p class="px-6">
 					With the HSBB Logistics program you can help us sending assets to Jita or Amarr (whichever is closer),
-					and profit while doing so. With HSBB becoming larger, we need to outsource more work. Creating couriers is one of those areas.
-					The ideal way to participate in this program is more about admin work (i.e. creating public couriers) and less about hauling items yourself.
+					and profit while doing so. With HSBB becoming larger, we need to outsource more work. Creating couriers is one
+					of those areas.
+					The ideal way to participate in this program is more about admin work (i.e. creating public couriers) and less
+					about hauling items yourself.
 				</p>
 				<p class="px-6">
 				</p>
@@ -77,9 +81,11 @@
 					<b>How does it work?</b>
 					You can request contracts of 2b to 20b ISK, and receive 3% of the value as a reward when the items have been
 					delivered
-					to Jita or Amarr (whichever is closer). This should be enough so that you can use public couriers or hauling providers
+					to Jita or Amarr (whichever is closer). This should be enough so that you can use public couriers or hauling
+					providers
 					while still making a profit. That means you don't have to risk losing your own ship.</p>
-				<p class="px-6">Contracts will be scattered across New Eden, but limited to highsec mainland (i.e. no islands). You're free to reject
+				<p class="px-6">Contracts will be scattered across New Eden, but limited to highsec mainland (i.e. no islands).
+					You're free to reject
 					contracts, but that will move you to the end of the queue.</p>
 				<p class="px-6">The process is simple: <b>Firstly</b>, use the request form below to request contracts. You
 					should receive a
@@ -89,7 +95,8 @@
 					We recommend that you create public
 					couriers to get the best match of safety and pricing. Use our <a href="/jobs/couriers" class="link">public
 						data</a> to help with
-					pricing your couriers. <b>Finally</b>, when all the items have arrived in to Jita or Amarr (whichever is closer)
+					pricing your couriers. <b>Finally</b>, when all the items have arrived in to Jita or Amarr (whichever is
+					closer)
 					contract them to <a href="https://evewho.com/character/93475128" class="link">Lerso Nardieu</a> and price
 					the contract at the Jita Buy value of all the items. Use the <a href="https://janice.e-351.com/" class="link">janice
 						appraisal</a>
@@ -138,11 +145,14 @@
 										<h2 class="text-xl font-semibold">Your Balance: <span
 											class={$page.data.balance >= 0 ? "text-green-400" : "text-red-400"}>{formatIsk($page.data.balance, true)}</span>
 											(<span
-												class="text-blue-400">{formatIsk($page.data.remainingContractCollateral, true)}</span> Collateral)
+												class="text-blue-400">{formatIsk($page.data.remainingContractCollateral, true)}</span>
+											Collateral)
 										</h2>
-										<!--										<button class="text-blue-600 hover:text-blue-800" on:click={exportToCsv}>-->
-										<!--											Export to CSV-->
-										<!--										</button>-->
+										{#if $page.data.transactions?.length > 0}
+											<a class="text-blue-600 hover:text-blue-800" href="/logistics/download-transactions">
+												Export to CSV
+											</a>
+										{/if}
 										<button
 											type="submit"
 											class="bg-blue-600 text-white px-4 py-2 rounded-md transition-colors {($page.data.hasPayoutRequest || $page.data.balance <= 0) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}"

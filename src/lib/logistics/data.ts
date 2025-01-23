@@ -75,7 +75,7 @@ async function getLocationName(locationId: number) {
 	return station.data.name;
 }
 
-export async function loadCharacterData(characterId: number) {
+export async function loadCharacterData(characterId: number, limitTransactionsRecentDays: number | undefined) {
 	const records: any & {created: Date} = await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
 			.send(new QueryCommand({
@@ -101,7 +101,14 @@ export async function loadCharacterData(characterId: number) {
 
 	const transactions = records
 		.filter((r: any) => r.sk.startsWith('transaction#'))
-		.sort((a: any, b: any) => b.created - a.created);
+		.filter((r: any) => {
+			if (!limitTransactionsRecentDays) {
+				return true;
+			} else {
+				return new Date(r.created).getTime() > (new Date().getTime() - limitTransactionsRecentDays * 24 * 60 * 60 * 1000);
+			}
+		})
+		.sort((a: any, b: any) => b.created - a.created)
 
 	const remainingContractCollateral = transactions
 		.filter((r: any) => r.transactionType.startsWith('contract') || r.transactionType === 'collateralTransfer' || r.transactionType === 'itemsCleared')

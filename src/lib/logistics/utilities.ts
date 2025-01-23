@@ -27,10 +27,6 @@ export function atLeast7Days(item: { updated: Date }) {
 	return countDays(item.updated) >= 7;
 }
 
-export function exportToCsv() {
-	alert('This is not implemented yet. Just ping Lerso on Discord.');
-}
-
 export function getDaysClass(days: number) {
 	if (days >= 14) return 'text-red-600 font-semibold';
 	if (days >= 7) return 'text-yellow-600 font-semibold';

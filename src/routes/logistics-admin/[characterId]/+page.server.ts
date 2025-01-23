@@ -4,6 +4,8 @@ import { loadCharacterData } from '$lib/logistics/data.ts';
 import axios from 'axios';
 import { env } from '$env/dynamic/private';
 
+const SKIP_JANICE = true;
+
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, params }) {
 	const token = cookies.get('token-v1');
@@ -29,10 +31,10 @@ export async function load({ cookies, params }) {
 		remainingContractCollateral,
 		balance,
 		pendingItems,
-	} = await loadCharacterData(+targetId);
+	} = await loadCharacterData(+targetId, undefined);
 
 	let janiceCalc = 'incomplete';
-	if (!!pendingItems.length) {
+	if (!!pendingItems.length && !SKIP_JANICE) {
 		const anyPositive = !!pendingItems.find((i) => i.amount > 0);
 		const anyNegative = !!pendingItems.find((i) => i.amount < 0);
 
