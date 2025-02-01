@@ -120,7 +120,7 @@ export async function loadCharacterData(characterId: number, limitTransactionsRe
 	}
 
 	const balance: number = transactions
-		.filter((r: any) => r.transactionType === 'reward' || r.transactionType === 'collateralTransfer' || r.transactionType === 'payout')
+		.filter((r: any) => r.transactionType === 'reward' || r.transactionType === 'collateralTransfer' || r.transactionType === 'payout' || r.transactionType === 'itemsCleared')
 		.sort((a: any, b: any) => b.created - a.created)[0]?.balance ?? 0;
 
 	let name = 'Unknown';

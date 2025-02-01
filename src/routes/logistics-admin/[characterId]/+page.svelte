@@ -13,6 +13,17 @@
 		alert('Done!');
 		window.location.replace('/logistics-admin');
 	}
+
+	async function clearItems() {
+		await fetch(`/api/logistics/clear-items/?characterId=${$page.params.characterId}`, {
+			method: 'POST',
+			body: JSON.stringify({
+				value: $page.data.clearableValue,
+			})
+		});
+		alert('Done!');
+		window.location.reload();
+	}
 </script>
 
 
@@ -56,11 +67,9 @@
 					<h2 class="text-xl font-semibold">Items Held</h2>
 				</div>
 				<p>
-					{#if $page.data.janiceCalc?.startsWith('https')}
-						<a href={$page.data.janiceCalc} target="_blank" class="text-blue-600 hover:text-blue-800">View on
-							Janice</a>
-					{:else}
-						Janice: {$page.data.janiceCalc ?? 'Unknown'}
+					{$page.data.clearableValue}
+					{#if $page.data.clearableValue > 0 }
+						<button class="btn btn-primary" on:click={clearItems}>Clear {$page.data.clearableValue.toLocaleString()}</button>
 					{/if}
 				</p>
 				<div class="overflow-x-auto">

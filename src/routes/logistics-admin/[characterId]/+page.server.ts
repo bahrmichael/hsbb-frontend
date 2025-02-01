@@ -4,7 +4,29 @@ import { loadCharacterData } from '$lib/logistics/data.ts';
 import axios from 'axios';
 import { env } from '$env/dynamic/private';
 
-const SKIP_JANICE = true;
+async function getItemsValue(items: {typeName: string, amount: number}[]): Promise<number> {
+	if (items.length === 0) {
+		return 0;
+	}
+	const janice = axios.create({
+		baseURL: `https://janice.e-351.com/api/rest`,
+		headers: {
+			'X-ApiKey': env.JANICE_API_KEY,
+			'Accept-Encoding': 'gzip,deflate,compress',
+			'User-Agent': env.JANICE_USER_AGENT
+		}
+	});
+
+	const text = items.map((i) => `${i.typeName} x${Math.abs(i.amount)}`).join('\n');
+	const janiceResult = (await janice.post(`/v2/appraisal?market=2&persist=true&compactize=true`, text, {
+		headers: {
+			'Content-Type': 'text/plain',
+			'accept': 'application/json'
+		}
+	})).data;
+
+	return Math.ceil(janiceResult.effectivePrices.totalBuyPrice);
+}
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, params }) {
@@ -30,39 +52,10 @@ export async function load({ cookies, params }) {
 		transactions,
 		remainingContractCollateral,
 		balance,
-		pendingItems,
+		pendingItems
 	} = await loadCharacterData(+targetId, undefined);
 
-	let janiceCalc = 'incomplete';
-	if (!!pendingItems.length && !SKIP_JANICE) {
-		const anyPositive = !!pendingItems.find((i) => i.amount > 0);
-		const anyNegative = !!pendingItems.find((i) => i.amount < 0);
-
-		if (anyPositive && anyNegative) {
-			janiceCalc = 'mixed';
-		} else {
-
-			const janice = axios.create({
-				baseURL: `https://janice.e-351.com/api/rest`,
-				headers: {
-					'X-ApiKey': env.JANICE_API_KEY,
-					'Accept-Encoding': 'gzip,deflate,compress',
-					'User-Agent': env.JANICE_USER_AGENT
-				}
-			});
-
-			const text = pendingItems.map((i) => `${i.typeName} x${Math.abs(i.amount)}`).join('\n');
-			const janiceResult = (await janice.post(`/v2/appraisal?market=2&persist=true&compactize=true`, text, {
-				headers: {
-					'Content-Type': 'text/plain',
-					'accept': 'application/json',
-				}
-			})).data;
-
-			janiceCalc = `https://janice.e-351.com/a/${janiceResult.code}`;
-		}
-
-	}
+	const clearableValue = await getItemsValue(pendingItems.filter((i) => i.amount < 0));
 
 	return {
 		characterId,
@@ -75,7 +68,7 @@ export async function load({ cookies, params }) {
 		balance,
 		name,
 		pendingItems,
-		janiceCalc,
+		clearableValue,
 	};
 }
 
