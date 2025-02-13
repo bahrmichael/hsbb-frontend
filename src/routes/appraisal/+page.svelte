@@ -3,6 +3,7 @@
 	import Footer from '$lib/Footer.svelte';
 	import ErrorIcon from '$lib/icons/Error.svelte';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
 	$: requiresSignIn = $page.data.requiresSignIn || !$page.data.token;
 
