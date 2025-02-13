@@ -87,9 +87,24 @@
 		setTimeout(() => showCheck[type] = false, 1000);
 	};
 
+	let copyBuyToClipboard = false;
+	onMount(() => {
+		copyBuyToClipboard = localStorage.getItem('copy-buy-to-clipboard') === 'true'
+	})
+	$: if (appraisalResult && copyBuyToClipboard) {
+		navigator.clipboard.writeText(appraisalResult.totals.buy.toString());
+		showCheck.buy = true;
+		setTimeout(() => showCheck.buy = false, 1000);
+	}
+
 </script>
 
 <style>
+		/*always show the scrollbar so that the content doesn't jump*/
+    :global(html) {
+        overflow-y: scroll;
+    }
+
     .fade-out {
         animation: fadeOut 2s forwards;
     }
