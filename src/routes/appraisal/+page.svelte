@@ -147,40 +147,44 @@ Zydrine 4" rows="9"
 			<div class="mt-8">
 				<div class="stats shadow w-full">
 					<div class="stat">
-						<div class="stat-title">Total Sell Value</div>
-						<div class="stat-value text-success">
-							<button
-								class="cursor-pointer bg-transparent border-none p-0 flex items-center gap-1"
-								on:click={() => copyToClipboard(appraisalResult.totals.sell, 'sell')}
-							>
-								{appraisalResult.totals.sell.toLocaleString()} ISK
-								<span class="w-4">
-									{#if showCheck.sell}
-											<span class="fade-out">✓</span>
-									{/if}
-							</span>
-							</button>
+						<div class="stat-title">Total Buy Value</div>
+						<div class="stat-value text-info text-2xl">
+							<div class="tooltip tooltip-info" data-tip={`Exact: ${appraisalResult.totals.buy.toLocaleString()} ISK`}>
+								<button
+									class="cursor-pointer bg-transparent border-none p-0 flex items-center gap-1"
+									on:click={() => copyToClipboard(appraisalResult.totals.buy, 'buy')}
+								>
+									{appraisalResult.totals.buy.toLocaleString(undefined, {maximumSignificantDigits: 6})} ISK
+									<span class="w-4">
+                    {#if showCheck.buy}
+                        <span class="fade-out">✓</span>
+                    {/if}
+                </span>
+								</button>
+							</div>
 						</div>
 					</div>
 					<div class="stat">
-						<div class="stat-title">Total Buy Value</div>
-						<div class="stat-value text-info">
-							<button
-								class="cursor-pointer bg-transparent border-none p-0 flex items-center gap-1"
-								on:click={() => copyToClipboard(appraisalResult.totals.buy, 'buy')}
-							>
-								{appraisalResult.totals.buy.toLocaleString()} ISK
-								<span class="w-4">
-									{#if showCheck.buy}
-											<span class="fade-out">✓</span>
-									{/if}
-							</span>
-							</button>
+						<div class="stat-title">Total Sell Value</div>
+						<div class="stat-value text-success text-2xl">
+							<div class="tooltip tooltip-success" data-tip={`Exact: ${appraisalResult.totals.sell.toLocaleString()} ISK`}>
+								<button
+									class="cursor-pointer bg-transparent border-none p-0 flex items-center gap-1"
+									on:click={() => copyToClipboard(appraisalResult.totals.sell, 'sell')}
+								>
+									{appraisalResult.totals.sell.toLocaleString(undefined, {maximumSignificantDigits: 6})} ISK
+									<span class="w-4">
+										{#if showCheck.sell}
+												<span class="fade-out">✓</span>
+										{/if}
+								</span>
+								</button>
+							</div>
 						</div>
 					</div>
 					<div class="stat">
 						<div class="stat-title">Total Volume</div>
-						<div class="stat-value">{appraisalResult.totals.volume.toLocaleString()} m³</div>
+						<div class="stat-value text-2xl">{appraisalResult.totals.volume.toLocaleString()} m³</div>
 					</div>
 				</div>
 
