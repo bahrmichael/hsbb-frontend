@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { decodeJwt } from '$lib/decode-jwt.ts';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DeleteCommand, GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DeleteCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { env } from '$env/dynamic/private';
 import { ulid } from 'ulid';
 
