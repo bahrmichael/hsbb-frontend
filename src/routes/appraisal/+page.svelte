@@ -37,7 +37,7 @@
 		unparsed: any,
 	}
 
-	let appraisalResult: AppraisalResult;
+	let appraisalResult: AppraisalResult | undefined;
 
 	let isLoadingAppraisal = false;
 	let appraisalError: string | null;
@@ -108,7 +108,16 @@
 <div id="container" class="container mx-auto">
 	<Navbar />
 	<div class="card-body">
-		<span class="font-bold text-2xl">Appraise your items</span>
+		<a
+			href="/appraisal"
+			class="no-underline"
+			on:click={() => {
+    calculatorInput = '';
+    appraisalResult = undefined;
+    appraisalError = null;
+  }}
+		><span class="font-bold text-2xl text-center block mb-5">HSBB Appraisal</span>
+		</a>
 		<textarea class="textarea textarea-bordered w-full" placeholder="Enter list of items to be appraised.
 
 Tritanium 22222
@@ -143,7 +152,7 @@ Zydrine 4" rows="9"
 <!--				</div>-->
 			{/if}
 		</div>
-		{#if appraisalResult}
+		{#if !!appraisalResult}
 			<div class="mt-8">
 				<div class="stats shadow w-full">
 					<div class="stat">
@@ -195,8 +204,8 @@ Zydrine 4" rows="9"
 							<th>Item</th>
 							<th>Name</th>
 							<th>Quantity</th>
-							<th>Sell Price</th>
 							<th>Buy Price</th>
+							<th>Sell Price</th>
 							<th>Volume</th>
 						</tr>
 						</thead>
@@ -213,8 +222,8 @@ Zydrine 4" rows="9"
 								</td>
 								<td>{item.typeName}</td>
 								<td>{item.quantity.toLocaleString()}</td>
-								<td>{item.prices.sell.percentile.toLocaleString()} ISK</td>
 								<td>{item.prices.buy.percentile.toLocaleString()} ISK</td>
+								<td>{item.prices.sell.percentile.toLocaleString()} ISK</td>
 								<td>{(item.typeVolume * item.quantity).toLocaleString()} m³</td>
 							</tr>
 						{/each}
