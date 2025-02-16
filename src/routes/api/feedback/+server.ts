@@ -21,7 +21,7 @@ export async function POST({ request, cookies }) {
 	\`\`\`
 	`;
 
- 	await fetch(env.DISCORD_FEEDBACK_URL, {
+ 	const res = await fetch(env.DISCORD_FEEDBACK_URL, {
  		method: 'POST',
  		headers: {
  			'Content-Type': 'application/json'
@@ -29,9 +29,10 @@ export async function POST({ request, cookies }) {
  		body: JSON.stringify({
  			content: feedback,
  		})
- 	}).catch(e => {
- 		console.error(e);
  	});
+
+	console.log('Status:', res.status)
+	console.log('Response:', await res.text())
 
 	return new Response(null, { status: 200 });
 }
