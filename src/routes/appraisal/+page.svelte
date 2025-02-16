@@ -45,6 +45,38 @@
 
 	let calculatorInput: string = '';
 
+	let pendingRequest: Promise<AppraisalResult> | null = null;
+	let debounceTimer: number | undefined;
+
+	$: {
+		if (calculatorInput && calculatorInput.length >= 3) {
+			clearTimeout(debounceTimer);
+			debounceTimer = setTimeout(() => {
+				pendingRequest = fetchAppraisal(calculatorInput);
+			}, 200);
+		}
+	}
+
+	// Extract the fetch logic into a separate function
+	async function fetchAppraisal(input: string): Promise<AppraisalResult> {
+		const formData = new FormData();
+		formData.append('raw_textarea', input);
+
+		const response = await fetch('/api/appraise', {
+			method: 'POST',
+			body: formData
+		});
+
+		const data = await response.json();
+		if (data.code === 'too_many_items') {
+			throw new Error('Too many lines. Maximum 500 allowed.');
+		} else if (data.code || response.status !== 200) {
+			throw new Error(`Unhandled error: ${data.code} (${response.status})`);
+		}
+		return data;
+	}
+
+	// Modify the submit function to use pending request
 	async function submit() {
 		appraisalError = null;
 		if (!calculatorInput || calculatorInput.length < 3) {
@@ -54,26 +86,17 @@
 
 		isLoadingAppraisal = true;
 		try {
-			const formData = new FormData();
-			formData.append('raw_textarea', calculatorInput);
-
-			const response = await fetch('/api/appraise', {
-				method: 'POST',
-				body: formData
-			});
-
-			const data = await response.json();
-			if (data.code === 'too_many_items') {
-				appraisalError = 'Too many lines. Maximum 500 allowed.';
-			} else if (data.code || response.status !== 200) {
-				appraisalError = `Unhandled error: ${data.code} (${response.status})`;
+			// Use pending request if available, otherwise make a new request
+			if (pendingRequest) {
+				appraisalResult = await pendingRequest;
 			} else {
-				appraisalResult = data;
+				appraisalResult = await fetchAppraisal(calculatorInput);
 			}
 		} catch (e) {
-			appraisalError = 'Failed to appraise the items. Please try again in 5 minutes or later.';
+			appraisalError = e instanceof Error ? e.message : 'Failed to appraise the items. Please try again in 5 minutes or later.';
 		} finally {
 			isLoadingAppraisal = false;
+			pendingRequest = null;
 		}
 	}
 
