@@ -17,13 +17,9 @@ export async function POST({ request, cookies }) {
 	formData.append('payload_json', JSON.stringify({
 		// discord allows up to 2000 characters
 		content: `Received ${payload.rating} stars from ${name}: ${payload.feedbackMessage}`.slice(0, 2000),
-		attachments: [
-			{ id: 0, filename: 'input.txt', spoiler: true },
-			{ id: 1, filename: 'evepraisal.json', spoiler: true }
-		]
 	}));
 	formData.append('files[0]', new Blob([payload.calculatorInput], { type: 'text/plain' }), 'input.txt');
-	formData.append('files[1]', new Blob([JSON.stringify(payload.appraisalResultJson)], { type: 'application/json' }), 'evepraisal.json');
+	formData.append('files[1]', new Blob([payload.appraisalResultJson], { type: 'application/json' }), 'evepraisal.json');
 
 	const res = await fetch(env.DISCORD_FEEDBACK_URL, {
 		method: 'POST',
