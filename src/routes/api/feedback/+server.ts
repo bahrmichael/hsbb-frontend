@@ -13,23 +13,18 @@ export async function POST({ request, cookies }) {
 
 	const payload = await request.json();
 
-	const feedback = `	Rating: ${payload.rating}
-	Feedback: ${payload.feedback}
-	User: ${name}
-	\`\`\`json
-	${JSON.stringify({ input: payload.calculatorInput, result: JSON.parse(payload.appraisalResultJson) })}
-	\`\`\`
-	`;
+	const formData = new FormData();
+	formData.append('payload_json', JSON.stringify({
+		// discord allows up to 2000 characters
+		content: `Received ${payload.rating} starts from ${name}: ${payload.feedback}`.slice(0, 2000),
+	}));
+	formData.append('files[0]', new Blob([payload.calculatorInput], { type: 'text/plain' }), 'input.txt');
+	formData.append('files[1]', new Blob([JSON.stringify(payload.appraisalResultJson)], { type: 'application/json' }), 'evepraisal.json');
 
- 	const res = await fetch(env.DISCORD_FEEDBACK_URL, {
- 		method: 'POST',
- 		headers: {
- 			'Content-Type': 'application/json'
- 		},
- 		body: JSON.stringify({
- 			content: feedback,
- 		})
- 	});
+	const res = await fetch(env.DISCORD_FEEDBACK_URL, {
+		method: 'POST',
+		body: formData
+	});
 
 	console.log('Status:', res.status)
 	console.log('Response:', await res.text())
