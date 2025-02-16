@@ -5,7 +5,7 @@
   export let onClose = () => show = false;
 
   let feedbackMessage = '';
-  let rating = 0;
+  let rating = 5;
 
   async function submitFeedback() {
     const feedback = {

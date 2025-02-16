@@ -13,16 +13,19 @@ export async function POST({ request, cookies }) {
 
 	const payload = await request.json();
 
+	const feedback = `Rating: ${payload.rating}
+	Feedback: ${payload.feedback}
+	User: ${name}
+	Data: ${JSON.stringify({ input: payload.calculatorInput, result: JSON.parse(payload.appraisalResultJson) })}
+	`;
+
  	await fetch(env.DISCORD_FEEDBACK_URL, {
  		method: 'POST',
  		headers: {
  			'Content-Type': 'application/json'
  		},
  		body: JSON.stringify({
- 			content: {
-				 ...payload,
-				 name,
-			}
+ 			content: feedback,
  		})
  	});
 
