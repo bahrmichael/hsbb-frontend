@@ -16,7 +16,9 @@ export async function POST({ request, cookies }) {
 	const feedback = `	Rating: ${payload.rating}
 	Feedback: ${payload.feedback}
 	User: ${name}
-	Data: ${JSON.stringify({ input: payload.calculatorInput, result: JSON.parse(payload.appraisalResultJson) })}
+	\`\`\`json
+	${JSON.stringify({ input: payload.calculatorInput, result: JSON.parse(payload.appraisalResultJson) })}
+	\`\`\`
 	`;
 
  	await fetch(env.DISCORD_FEEDBACK_URL, {
@@ -27,6 +29,8 @@ export async function POST({ request, cookies }) {
  		body: JSON.stringify({
  			content: feedback,
  		})
+ 	}).catch(e => {
+ 		console.error(e);
  	});
 
 	return new Response(null, { status: 200 });
