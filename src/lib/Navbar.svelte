@@ -18,7 +18,7 @@
 		{/if}
 		<a class="btn btn-ghost text-xl font-bold mx-4" href="/">{name}</a>
 		{#if isHsbb}
-			<div class="text-xl">The fastest buyback service in New Eden!</div>
+			<div class="text-xl hidden lg:block">The fastest buyback service in New Eden!</div>
 		{/if}
 	</div>
 	<div class="flex-none">

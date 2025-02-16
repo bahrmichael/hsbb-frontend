@@ -9,11 +9,8 @@ export async function POST({ request, cookies }) {
 	if (!token) {
 		throw error(401, 'Unauthorized');
 	}
-	const { name } = await decodeJwt(token, 'token-v1');
-
-	if (name !== 'Lerso Nardieu') {
-		throw error(403, 'Forbidden');
-	}
+	// just verify the token is valid
+	await decodeJwt(token, 'token-v1');
 
 	const formData = await request.formData();
 

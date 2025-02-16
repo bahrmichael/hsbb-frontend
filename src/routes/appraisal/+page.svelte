@@ -4,6 +4,9 @@
 	import ErrorIcon from '$lib/icons/Error.svelte';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import FeedbackDialog from '$lib/FeedbackDialog.svelte';
+
+	let showFeedbackDialog = false;
 
 	$: requiresSignIn = $page.data.requiresSignIn || !$page.data.token;
 
@@ -48,13 +51,25 @@
 	let pendingRequest: Promise<AppraisalResult> | null = null;
 	let debounceTimer: number | undefined;
 
+	let previousLength = 0;
+
 	$: {
-		if (calculatorInput && calculatorInput.length >= 3) {
-			clearTimeout(debounceTimer);
-			debounceTimer = setTimeout(() => {
+		const hasAtLeast3Letters = calculatorInput.match(/[A-Za-z]{3,}/g);
+		if (hasAtLeast3Letters) {
+			const manualEditAdded = calculatorInput.length === previousLength + 1;
+			const manualEditRemoved = calculatorInput.length < previousLength;
+			if (manualEditAdded || manualEditRemoved) {
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(() => {
+					pendingRequest = fetchAppraisal(calculatorInput);
+				}, 200);
+			} else {
+				// Used pasted input, submit an appraisal immediately
 				pendingRequest = fetchAppraisal(calculatorInput);
-			}, 200);
+			}
 		}
+
+		previousLength = calculatorInput.length;
 	}
 
 	// Extract the fetch logic into a separate function
@@ -146,7 +161,14 @@
 
 <div id="container" class="container mx-auto">
 	<Navbar />
-	<div class="card-body">
+
+	<div class="lg:mx-32 xl:mx-48">
+
+		<div role="alert" class="alert alert-info mb-10">
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+			<span>We're building the fastest and most reliable appraisal for EVE Online. This tool is still in beta, and we welcome any feedback and bug reports!</span>
+		</div>
+
 		<a
 			href="/appraisal"
 			class="no-underline"
@@ -166,12 +188,14 @@ Isogen 500
 Nocxium 2
 Zydrine 4" rows="9"
 							bind:value={calculatorInput}></textarea>
-		<div class="flex justify-between">
-			{#if appraisalResult != null && !appraisalError }
-				<span class="text-sm text-success">Appraisal succeeded. Scroll down to see the result.</span>
-			{/if}
-		</div>
 		<div class="card-actions justify-end">
+			{#if appraisalResult}
+				<button
+					class="btn btn-ghost"
+					on:click={() => showFeedbackDialog = true}>
+					Report Issue
+				</button>
+			{/if}
 			{#if appraisalError}
 				<div role="alert" class="alert alert-error w-3/4">
 					<ErrorIcon />
@@ -232,7 +256,7 @@ Zydrine 4" rows="9"
 					</div>
 					<div class="stat">
 						<div class="stat-title">Total Volume</div>
-						<div class="stat-value text-2xl">{appraisalResult.totals.volume.toLocaleString()} m³</div>
+						<div class="stat-value text-2xl">{(Math.ceil(appraisalResult.totals.volume * 100) / 100).toLocaleString()} m³</div>
 					</div>
 				</div>
 
@@ -274,4 +298,11 @@ Zydrine 4" rows="9"
 
 	</div>
 	<Footer />
+
+	<FeedbackDialog
+		show={showFeedbackDialog}
+		calculatorInput={calculatorInput}
+		appraisalResultJson={JSON.stringify(appraisalResult)}
+		onClose={() => showFeedbackDialog = false}
+	/>
 </div>
