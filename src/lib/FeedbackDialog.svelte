@@ -24,7 +24,7 @@
     });
 
     feedbackMessage = '';
-    rating = 0;
+    rating = 5;
     alert('Thank you!')
     onClose();
   }
