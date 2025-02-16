@@ -13,7 +13,7 @@ export async function POST({ request, cookies }) {
 
 	const payload = await request.json();
 
-	const feedback = `Rating: ${payload.rating}
+	const feedback = `	Rating: ${payload.rating}
 	Feedback: ${payload.feedback}
 	User: ${name}
 	Data: ${JSON.stringify({ input: payload.calculatorInput, result: JSON.parse(payload.appraisalResultJson) })}
