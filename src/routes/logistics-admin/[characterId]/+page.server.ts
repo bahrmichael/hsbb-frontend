@@ -55,7 +55,13 @@ export async function load({ cookies, params }) {
 		pendingItems
 	} = await loadCharacterData(+targetId, undefined);
 
-	const clearableValue = await getItemsValue(pendingItems.filter((i) => i.amount < 0));
+	const surplusItems = pendingItems.filter((i) => i.amount < 0);
+	let clearableValue: number;
+	if (surplusItems.length > 0) {
+		clearableValue = await getItemsValue(surplusItems);
+	} else {
+		clearableValue = -1 * await getItemsValue(pendingItems.filter((i) => i.amount > 0));
+	}
 
 	return {
 		characterId,

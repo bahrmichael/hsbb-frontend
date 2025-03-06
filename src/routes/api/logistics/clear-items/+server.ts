@@ -28,21 +28,11 @@ export async function POST({ url, cookies, request }) {
 	const { value: amount } = await request.json();
 	console.log({ amount });
 
+	const collateral = (await getMostRecentBalance(+characterIdParam))?.collateral ?? 0;
+
 	// add a transaction
-
-	const latestTransaction = ((await ddb.send(new QueryCommand({
-		TableName: env.AWS_LOGISTICS_TABLE_NAME,
-		KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
-		ExpressionAttributeValues: {
-			':pk': `character#${characterIdParam}`,
-			':sk': 'transaction#',
-		},
-		ScanIndexForward: false,
-		Limit: 1,
-	}))).Items ?? [])[0];
-
-	const newBalance = (latestTransaction?.balance ?? 0) + amount;
-
+	const balance = (await getMostRecentBalance(+characterIdParam))?.balance ?? 0;
+	const newBalance = balance + amount;
 	await ddb.send(new PutCommand({
 		TableName: env.AWS_LOGISTICS_TABLE_NAME,
 		Item: {
@@ -51,13 +41,13 @@ export async function POST({ url, cookies, request }) {
 			transactionType: 'itemsCleared',
 			amount,
 			balance: newBalance,
+			collateral,
 			created: Date.now(),
 			version: '2'
 		}
 	}));
 
 	// clear items
-
 	const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
 		const queryResponse = await ddb
 			.send(new QueryCommand({
@@ -87,7 +77,102 @@ export async function POST({ url, cookies, request }) {
 		}));
 	}
 
+	await attemptCollateralTransfer(+characterIdParam, new Date())
+
 	return new Response(null, { status: 200 });
+}
+
+type Transaction = any;
+
+async function getMostRecentCollateral(characterId: number): Promise<Transaction> {
+	return ((await ddb.send(new QueryCommand({
+		TableName: env.AWS_LOGISTICS_TABLE_NAME,
+		KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+		FilterExpression: '#version = :v',
+		ExpressionAttributeValues: {
+			':pk': `character#${characterId}`,
+			':sk': 'transaction#',
+			':v': '2',
+		},
+		ExpressionAttributeNames: {
+			'#version': 'version'
+		},
+		ConsistentRead: true,
+		ScanIndexForward: false,
+	}))).Items ?? [])
+		.filter((r) => r.transactionType === 'contractOut' || r.transactionType === 'contractIn' || r.transactionType === 'collateralTransfer' || r.transactionType === 'itemsCleared')[0];
+}
+
+async function getMostRecentBalance(characterId: number): Promise<Transaction> {
+	return ((await ddb.send(new QueryCommand({
+		TableName: env.AWS_LOGISTICS_TABLE_NAME,
+		KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+		FilterExpression: '#version = :v and attribute_exists(balance)',
+		ExpressionAttributeValues: {
+			':pk': `character#${characterId}`,
+			':sk': 'transaction#',
+			':v': '2',
+		},
+		ExpressionAttributeNames: {
+			'#version': 'version'
+		},
+		ConsistentRead: true,
+		ScanIndexForward: false,
+	}))).Items ?? [])[0];
+}
+
+async function addCollateralTransfer(characterId: number, date: Date): Promise<void> {
+	const recentCollateral = (await getMostRecentCollateral(characterId))?.collateral ?? 0;
+	const recentBalance = (await getMostRecentBalance(characterId))?.balance ?? 0;
+	const newBalance = recentBalance + recentCollateral;
+	await ddb.send(new PutCommand({
+		TableName: env.AWS_LOGISTICS_TABLE_NAME,
+		Item: {
+			pk: `character#${characterId}`,
+			sk: `transaction#${ulid()}`,
+			transactionType: 'collateralTransfer',
+			amount: recentCollateral,
+			collateral: 0,
+			balance: newBalance,
+			created: date.getTime(),
+			version: '2',
+		}
+	}));
+}
+
+
+async function attemptCollateralTransfer(characterId: number, date: Date) {
+	const nonZeroItems: any[] = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+		const queryResponse = await ddb
+			.send(new QueryCommand({
+				TableName: env.AWS_LOGISTICS_TABLE_NAME,
+				KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk)',
+				FilterExpression: 'amount <> :a and #version = :v',
+				ExpressionAttributeValues: {
+					':pk': `character#${characterId}`,
+					':sk': `item#`,
+					':a': 0,
+					':v': '2',
+				},
+				ExpressionAttributeNames: {
+					'#version': 'version'
+				},
+				ExclusiveStartKey,
+			}));
+
+		return {
+			marker: queryResponse.LastEvaluatedKey,
+			results: queryResponse.Items,
+		};
+	});
+
+	if (nonZeroItems.length > 0) {
+		return;
+	}
+
+	console.log('Starting collateral transfer', {characterId})
+
+	await addCollateralTransfer(characterId, date);
 }
 
 const getPaginatedResults = async (fn: any) => {
