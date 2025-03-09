@@ -68,8 +68,8 @@
 				</div>
 				<p>
 					{$page.data.clearableValue}
-					{#if $page.data.clearableValue > 0 }
-						<button class="btn btn-primary" on:click={clearItems}>Clear {$page.data.clearableValue.toLocaleString()}</button>
+					{#if $page.data.clearableValue !== 0 }
+						<button class="btn btn-primary" on:click={clearItems}>Clear {$page.data.clearableValue.toLocaleString()} ISK</button>
 					{/if}
 				</p>
 				<div class="overflow-x-auto">

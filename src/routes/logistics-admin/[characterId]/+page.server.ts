@@ -53,7 +53,7 @@ export async function load({ cookies, params }) {
 		remainingContractCollateral,
 		balance,
 		pendingItems
-	} = await loadCharacterData(+targetId, undefined);
+	} = await loadCharacterData(+targetId, 60);
 
 	const surplusItems = pendingItems.filter((i) => i.amount < 0);
 	let clearableValue: number;
