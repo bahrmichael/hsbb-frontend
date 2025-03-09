@@ -28,7 +28,7 @@ export async function POST({ url, cookies, request }) {
 	const { value: amount } = await request.json();
 	console.log({ amount });
 
-	const collateral = (await getMostRecentBalance(+characterIdParam))?.collateral ?? 0;
+	const collateral = (await getMostRecentCollateral(+characterIdParam))?.collateral ?? 0;
 
 	// add a transaction
 	const balance = (await getMostRecentBalance(+characterIdParam))?.balance ?? 0;
