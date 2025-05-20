@@ -13,9 +13,63 @@
 		showEveStore = true;
 	}
 
+	interface Campaign {
+		path: string;
+		endDate: Date;
+	}
+
+	// Import all PNG files from store-events directory
+	const campaignFiles = import.meta.glob('/static/store-events/*.png', { eager: true });
+
+	const getAvailableCampaigns = (): Campaign[] => {
+		const campaigns: Campaign[] = [];
+
+		for (const path in campaignFiles) {
+			// Extract filename from path
+			const filename = path.split('/').pop() || '';
+
+			// Check if filename matches date pattern (YYYY-MM-DD.png)
+			if (/^\d{4}-\d{2}-\d{2}\.png$/.test(filename)) {
+				const dateStr = filename.replace('.png', '');
+
+				// Convert path from /static/... to /... for client-side use
+				const publicPath = path.replace('/static', '');
+
+				campaigns.push({
+					path: publicPath,
+					endDate: new Date(dateStr)
+				});
+			}
+		}
+
+		return campaigns;
+	};
+
+	const getNextCampaign = (campaigns: Campaign[]): Campaign | null => {
+		if (!campaigns.length) return null;
+
+		const tomorrow = new Date();
+		tomorrow.setDate(tomorrow.getDate() + 1);
+		tomorrow.setHours(0, 0, 0, 0);
+
+		// Filter campaigns that end at least tomorrow
+		const validCampaigns = campaigns.filter((campaign) => campaign.endDate >= tomorrow);
+		if (!validCampaigns.length) return null;
+
+		// Sort by end date (ascending) and take the first one (soonest end date)
+		validCampaigns.sort((a, b) => a.endDate.getTime() - b.endDate.getTime());
+		return validCampaigns[0];
+	};
+
 	onMount(async () => {
 		if (showEveStore) {
-			selectedImage = '/store-event-omega-december.jpg';
+			const campaigns = getAvailableCampaigns();
+			const nextCampaign = getNextCampaign(campaigns);
+
+			if (nextCampaign) {
+				selectedImage = nextCampaign.path;
+			}
+
 			await fetch(`/api/store/view?store=${storeSelect}&compact=${compact}`);
 		}
 	});
