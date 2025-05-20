@@ -1,0 +1,65 @@
+name: Process Campaign Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_url:
+        description: 'URL of the image to download'
+        required: true
+      end_date:
+        description: 'End date of the campaign (YYYY-MM-DD)'
+        required: true
+
+jobs:
+  process-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check if user is authorized
+        run: |
+          if [[ "${{ github.actor }}" != "bahrmichael" ]]; then
+            echo "Error: Only bahrmichael can run this workflow"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install sharp
+
+      - name: Process Image
+        run: |
+          mkdir -p static/store-events
+          curl -s "${{ github.event.inputs.image_url }}" -o temp_image
+          node -e '
+          const sharp = require("sharp");
+          const fs = require("fs");
+          const endDate = "${{ github.event.inputs.end_date }}";
+
+          sharp("temp_image")
+            .resize(600, null, { fit: "contain" })
+            .toFile(`static/store-events/${endDate}.png`)
+            .then(() => {
+              console.log("Image processed successfully!");
+              fs.unlinkSync("temp_image");
+            })
+            .catch(err => {
+              console.error("Error processing image:", err);
+              process.exit(1);
+            });
+          '
+
+      - name: Commit and push processed image
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add static/store-events/${{ github.event.inputs.end_date }}.png
+          git commit -m "Add campaign image for ${{ github.event.inputs.end_date }}"
+          git push
