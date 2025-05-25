@@ -10,6 +10,7 @@
 
 <div id="container" class="container mx-auto">
 	<Navbar />
-	<Couriers />
+	<!-- <Couriers /> -->
+	<p>Courier stats will be back soon!</p>
 	<Footer />
 </div>

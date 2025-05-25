@@ -1,4 +1,4 @@
-const AUTH_API = `https://uc4v3lk6rh.execute-api.us-east-1.amazonaws.com/dev/auth`;
+const AUTH_API = `https://y3imsgj22rfwqumnsdpwsa7gje0lbgte.lambda-url.us-east-1.on.aws/`;
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
@@ -6,12 +6,19 @@ export async function load({ cookies, request }) {
 	const instance = url.origin.includes('lowsec') ? 'lowsec' : 'highsec';
 	const searchParams = url.searchParams;
 	const state = searchParams.get('state');
-	const appId = state === 'ingame' ? 'hsbb-jobs' : ( state === 'audit' ? 'hsbb-member-audit' : `${instance}-buyback`);
+	const appId =
+		state === 'ingame'
+			? 'hsbb-jobs'
+			: state === 'audit'
+				? 'hsbb-member-audit'
+				: `${instance}-buyback`;
 	const code = searchParams.get('code');
 
-	let authUrl = `${AUTH_API}?code=${code}&appId=${appId}`;
+	const authUrl = `${AUTH_API}?code=${code}&app_id=${appId}`;
+	console.log({ authUrl });
 	try {
 		const response = await fetch(authUrl);
+		console.log(response.status, await response.text());
 		if (response.status >= 400) {
 			return {
 				error: 'Failed to authenticate'
