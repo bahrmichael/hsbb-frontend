@@ -8,83 +8,99 @@ import { error } from '@sveltejs/kit';
 const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
 async function getContractRequests() {
-	return await getPaginatedResults(async (ExclusiveStartKey: any) => {
-		const queryResponse = await ddb
-			.send(new QueryCommand({
-				ExclusiveStartKey, ...{
-					TableName: env.AWS_LOGISTICS_TABLE_NAME,
-					KeyConditionExpression: 'pk = :pk',
-					ExpressionAttributeValues: {
-						':pk': `requests`
+	return (
+		(await getPaginatedResults(async (ExclusiveStartKey: any) => {
+			const queryResponse = await ddb.send(
+				new QueryCommand({
+					ExclusiveStartKey,
+					...{
+						TableName: env.AWS_LOGISTICS_TABLE_NAME,
+						KeyConditionExpression: 'pk = :pk',
+						ExpressionAttributeValues: {
+							':pk': `requests`
+						}
 					}
-				}
-			}));
+				})
+			);
 
-		return {
-			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items
-		};
-	}) ?? [];
+			return {
+				marker: queryResponse.LastEvaluatedKey,
+				results: queryResponse.Items
+			};
+		})) ?? []
+	);
 }
 
 async function getPayoutRequests() {
-	return await getPaginatedResults(async (ExclusiveStartKey: any) => {
-		const queryResponse = await ddb
-			.send(new QueryCommand({
-				ExclusiveStartKey, ...{
-					TableName: env.AWS_LOGISTICS_TABLE_NAME,
-					KeyConditionExpression: 'pk = :pk',
-					ExpressionAttributeValues: {
-						':pk': `payoutRequests`
+	return (
+		(await getPaginatedResults(async (ExclusiveStartKey: any) => {
+			const queryResponse = await ddb.send(
+				new QueryCommand({
+					ExclusiveStartKey,
+					...{
+						TableName: env.AWS_LOGISTICS_TABLE_NAME,
+						KeyConditionExpression: 'pk = :pk',
+						ExpressionAttributeValues: {
+							':pk': `payoutRequests`
+						}
 					}
-				}
-			}));
+				})
+			);
 
-		return {
-			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items
-		};
-	}) ?? []
+			return {
+				marker: queryResponse.LastEvaluatedKey,
+				results: queryResponse.Items
+			};
+		})) ?? []
+	);
 }
 
 async function getParticipants() {
-	return await getPaginatedResults(async (ExclusiveStartKey: any) => {
-		const queryResponse = await ddb
-			.send(new QueryCommand({
-				ExclusiveStartKey, ...{
-					TableName: env.AWS_LOGISTICS_TABLE_NAME,
-					KeyConditionExpression: 'pk = :pk',
-					ExpressionAttributeValues: {
-						':pk': `participants`
+	return (
+		(await getPaginatedResults(async (ExclusiveStartKey: any) => {
+			const queryResponse = await ddb.send(
+				new QueryCommand({
+					ExclusiveStartKey,
+					...{
+						TableName: env.AWS_LOGISTICS_TABLE_NAME,
+						KeyConditionExpression: 'pk = :pk',
+						ExpressionAttributeValues: {
+							':pk': `participants`
+						}
 					}
-				}
-			}));
+				})
+			);
 
-		return {
-			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items
-		};
-	}) ?? [];
+			return {
+				marker: queryResponse.LastEvaluatedKey,
+				results: queryResponse.Items
+			};
+		})) ?? []
+	);
 }
 
 async function getOuts() {
-	return await getPaginatedResults(async (ExclusiveStartKey: any) => {
-		const queryResponse = await ddb
-			.send(new QueryCommand({
-				ExclusiveStartKey, ...{
-					TableName: env.AWS_LOGISTICS_TABLE_NAME,
-					KeyConditionExpression: 'pk = :pk',
-					ExpressionAttributeValues: {
-						':pk': `out`
+	return (
+		(await getPaginatedResults(async (ExclusiveStartKey: any) => {
+			const queryResponse = await ddb.send(
+				new QueryCommand({
+					ExclusiveStartKey,
+					...{
+						TableName: env.AWS_LOGISTICS_TABLE_NAME,
+						KeyConditionExpression: 'pk = :pk',
+						ExpressionAttributeValues: {
+							':pk': `out`
+						}
 					}
-				}
-			}));
+				})
+			);
 
-		return {
-			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items
-		};
-	}) ?? [];
+			return {
+				marker: queryResponse.LastEvaluatedKey,
+				results: queryResponse.Items
+			};
+		})) ?? []
+	);
 }
 
 /** @type {import('./$types').PageServerLoad} */
@@ -104,7 +120,7 @@ export async function load({ cookies, request }) {
 		getContractRequests(),
 		getPayoutRequests(),
 		getParticipants(),
-	// todo: drop the outs once enough participant records have been added
+		// todo: drop the outs once enough participant records have been added
 		getOuts()
 	]);
 
@@ -117,31 +133,35 @@ export async function load({ cookies, request }) {
 	payoutRequests.sort((a: any, b: any) => a.created - b.created);
 
 	for (const payoutRequest of payoutRequests) {
-		const rewards = ((await ddb.send(new QueryCommand({
-			TableName: env.AWS_LOGISTICS_TABLE_NAME,
-			KeyConditionExpression: `pk = :pk and begins_with(sk, :sk)`,
-			FilterExpression: 'transactionType = :r',
-			ExpressionAttributeValues: {
-				':pk': `character#${payoutRequest.characterId}`,
-				':sk': 'transaction#',
-				':r': 'reward'
-			},
-			ScanIndexForward: false
-		}))).Items ?? []).sort((a: any, b: any) => b.created - a.created);
+		const rewards = (
+			(
+				await ddb.send(
+					new QueryCommand({
+						TableName: env.AWS_LOGISTICS_TABLE_NAME,
+						KeyConditionExpression: `pk = :pk and begins_with(sk, :sk)`,
+						FilterExpression: 'transactionType = :r',
+						ExpressionAttributeValues: {
+							':pk': `character#${payoutRequest.characterId}`,
+							':sk': 'transaction#',
+							':r': 'reward'
+						},
+						ScanIndexForward: false
+					})
+				)
+			).Items ?? []
+		).sort((a: any, b: any) => b.created - a.created);
 
 		payoutRequest.value = rewards[0]?.balance ?? 0;
 	}
 
-	const characterIds: number[] = participants.map(p => p.characterId);
+	const characterIds: number[] = participants.map((p) => p.characterId);
 	characterIds.push(...contractRequests.map((o: any) => o.characterId));
 	characterIds.push(...payoutRequests.map((o: any) => o.characterId));
 	characterIds.push(...outs.map((o: any) => o.characterId));
 
 	const uniqueCharacterIds = [...new Set(characterIds)];
 
-	const characters = (await axios.post(`https://esi.evetech.net/v3/universe/names`, uniqueCharacterIds)).data
-		.filter((r: any) => r.category === 'character')
-		.sort((a, b) => a.name.localeCompare(b.name));
+	const characters = await getCharacters(uniqueCharacterIds);
 
 	return {
 		characterId,
@@ -154,6 +174,16 @@ export async function load({ cookies, request }) {
 	};
 }
 
+const getCharacters = async (ids: number[]) => {
+	if (!ids || ids.length === 0) {
+		return [];
+	}
+
+	return (await axios.post(`https://esi.evetech.net/v3/universe/names`, ids)).data
+		.filter((r: any) => r.category === 'character')
+		.sort((a, b) => a.name.localeCompare(b.name));
+};
+
 const getPaginatedResults = async (fn: any) => {
 	const EMPTY = Symbol('empty');
 	const res = [];
@@ -161,8 +191,11 @@ const getPaginatedResults = async (fn: any) => {
 		let NextMarker = EMPTY;
 		let count = 0;
 		while (NextMarker || NextMarker === EMPTY) {
-			const { marker, results, count: ct } =
-				await fn(NextMarker !== EMPTY ? NextMarker : undefined, count);
+			const {
+				marker,
+				results,
+				count: ct
+			} = await fn(NextMarker !== EMPTY ? NextMarker : undefined, count);
 
 			yield* results;
 
