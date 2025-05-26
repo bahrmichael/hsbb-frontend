@@ -1,4 +1,4 @@
-const AUTH_API = `https://y3imsgj22rfwqumnsdpwsa7gje0lbgte.lambda-url.us-east-1.on.aws/`;
+const AUTH_API = `https://uc4v3lk6rh.execute-api.us-east-1.amazonaws.com/dev/auth`;
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
@@ -14,11 +14,9 @@ export async function load({ cookies, request }) {
 				: `${instance}-buyback`;
 	const code = searchParams.get('code');
 
-	const authUrl = `${AUTH_API}?code=${code}&app_id=${appId}`;
-	console.log({ authUrl });
+	const authUrl = `${AUTH_API}?code=${code}&appId=${appId}`;
 	try {
 		const response = await fetch(authUrl);
-		console.log(response.status, await response.text());
 		if (response.status >= 400) {
 			return {
 				error: 'Failed to authenticate'
