@@ -25,13 +25,13 @@
 		<ul class="menu menu-horizontal px-1">
 			{#if isHsbb}
 				<li>
-						<a href="/jobs">Jobs</a>
+					<a href="/jobs">Jobs</a>
 				</li>
 				<li>
-						<a href="/courier-stats">Courier Stats</a>
+					<a href="/courier-stats">Courier Stats</a>
 				</li>
 				<li>
-						<a href="/contract-stats">Contract Stats</a>
+					<a href="/contract-stats">Contract Stats</a>
 				</li>
 			{/if}
 			<li>
