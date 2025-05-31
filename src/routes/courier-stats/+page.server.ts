@@ -1,16 +1,27 @@
-import { env } from '$env/dynamic/private';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { list } from '@vercel/blob';
 
-const s3 = new S3Client({ region: 'us-east-1' });
-
-/** @type {import('./$types').PageServerLoad} */
 export async function load() {
-	const body = await s3.send(new GetObjectCommand({
-		Bucket: env.AWS_BUCKET_NAME,
-		Key: 'couriers-snapshot',
-	})).then((res) => res.Body.transformToString());
-	console.log(body);
-	return {
-		couriers: JSON.parse(body),
+	try {
+		const { blobs } = await list({
+			prefix: 'completed-couriers.json'
+		});
+
+		if (blobs.length === 0) {
+			throw new Error('No file found');
+		}
+
+		const firstBlob = blobs[0];
+
+		const response = await fetch(firstBlob.url);
+		const couriers = await response.json();
+
+		return {
+			couriers
+		};
+	} catch (error) {
+		console.error('Error loading completed couriers:', error);
+		return {
+			couriers: []
+		};
 	}
 }

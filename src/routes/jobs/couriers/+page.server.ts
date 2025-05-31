@@ -1,22 +1,27 @@
-import { env } from '$env/dynamic/private';
-import { decodeJwt } from '$lib/decode-jwt.ts';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { list } from '@vercel/blob';
 
-const s3 = new S3Client({ region: 'us-east-1' });
+export async function load() {
+	try {
+		const { blobs } = await list({
+			prefix: 'outstanding-couriers.json'
+		});
 
-/** @type {import('./$types').PageServerLoad} */
-export async function load({cookies}) {
-	const body = await s3.send(new GetObjectCommand({
-		Bucket: env.AWS_BUCKET_NAME,
-		Key: 'couriers-outstanding',
-	})).then((res) => res.Body.transformToString());
+		if (blobs.length === 0) {
+			throw new Error('File not found');
+		}
 
-	const token = cookies.get('token-ingame');
+		const firstBlob = blobs[0];
 
-	return {
-		// the filter against d1 is a safety guard that this courier has received all the necessary data, and is not in a broken state
-		couriers: JSON.parse(body).filter((c: any) => c.d1 > 0),
-		authenticated: !!token,
-		characterName: token ? (await decodeJwt(token, 'ingame')).name : undefined,
+		const response = await fetch(firstBlob.url);
+		const couriers = await response.json();
+
+		return {
+			couriers
+		};
+	} catch (error) {
+		console.error('Error loading oustanding couriers:', error);
+		return {
+			couriers: []
+		};
 	}
 }

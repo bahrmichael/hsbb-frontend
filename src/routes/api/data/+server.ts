@@ -23,16 +23,20 @@ export async function POST({ request, url }) {
 	const blobFilename = `${filename}.json`;
 	const blob = await put(blobFilename, JSON.stringify(jsonData), {
 		access: 'public',
+		allowOverwrite: true
 	});
 
-	return new Response(JSON.stringify({ 
-		success: true, 
-		url: blob.url,
-		filename: blobFilename 
-	}), { 
-		status: 200,
-		headers: {
-			'Content-Type': 'application/json'
+	return new Response(
+		JSON.stringify({
+			success: true,
+			url: blob.url,
+			filename: blobFilename
+		}),
+		{
+			status: 200,
+			headers: {
+				'Content-Type': 'application/json'
+			}
 		}
-	});
+	);
 }
