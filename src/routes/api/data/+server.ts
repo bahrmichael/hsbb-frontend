@@ -13,13 +13,13 @@ export async function POST({ request, url }) {
 	if (!filename) {
 		throw error(400, 'Missing required filename query parameter');
 	}
-	
+
 	if (filename.endsWith('.json')) {
 		throw error(400, 'Filename must not have .json suffix');
 	}
 
 	const jsonData = await request.json();
-	
+
 	const blobFilename = `${filename}.json`;
 	const blob = await put(blobFilename, JSON.stringify(jsonData), {
 		access: 'public',
