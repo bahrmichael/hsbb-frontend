@@ -6,7 +6,6 @@ export async function POST({ url, cookies }) {
 	if (!cookieName) {
 		error(400, 'cookieName is required');
 	}
-	console.log(url.pathname);
-	cookies.delete(cookieName, {path: '/'});
+	cookies.delete(cookieName, { path: '/' });
 	return new Response(null, { status: 200 });
 }

@@ -6,12 +6,12 @@ const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET({ url, cookies }) {
-	const token = cookies.get('token-v1');
+	const token = cookies.get('token-v2');
 	if (!token) {
 		return new Response(null, { status: 200 });
 	}
 	try {
-		await decodeJwt(token, 'token-v1');
+		await decodeJwt(token, 'token-v2');
 	} catch (e) {
 		console.error(e);
 		return new Response(null, { status: 200 });

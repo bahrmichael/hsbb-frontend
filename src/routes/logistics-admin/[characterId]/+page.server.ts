@@ -4,7 +4,7 @@ import { loadCharacterData } from '$lib/logistics/data.ts';
 import axios from 'axios';
 import { env } from '$env/dynamic/private';
 
-async function getItemsValue(items: {typeName: string, amount: number}[]): Promise<number> {
+async function getItemsValue(items: { typeName: string; amount: number }[]): Promise<number> {
 	if (items.length === 0) {
 		return 0;
 	}
@@ -18,24 +18,26 @@ async function getItemsValue(items: {typeName: string, amount: number}[]): Promi
 	});
 
 	const text = items.map((i) => `${i.typeName} x${Math.abs(i.amount)}`).join('\n');
-	const janiceResult = (await janice.post(`/v2/appraisal?market=2&persist=true&compactize=true`, text, {
-		headers: {
-			'Content-Type': 'text/plain',
-			'accept': 'application/json'
-		}
-	})).data;
+	const janiceResult = (
+		await janice.post(`/v2/appraisal?market=2&persist=true&compactize=true`, text, {
+			headers: {
+				'Content-Type': 'text/plain',
+				accept: 'application/json'
+			}
+		})
+	).data;
 
 	return Math.ceil(janiceResult.effectivePrices.totalBuyPrice);
 }
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, params }) {
-	const token = cookies.get('token-v1');
+	const token = cookies.get('token-v2');
 	if (!token) {
 		throw error(401, 'Unauthorized');
 	}
 
-	const { characterId, iat } = await decodeJwt(token, 'token-v1');
+	const { characterId, iat } = await decodeJwt(token, 'token-v2');
 
 	if (characterId !== 93475128) {
 		throw error(403, 'Forbidden');
@@ -43,7 +45,7 @@ export async function load({ cookies, params }) {
 
 	const targetId = params.characterId;
 	if (!targetId) {
-		throw error(400, 'Can\'t resolve characterId from path.');
+		throw error(400, "Can't resolve characterId from path.");
 	}
 
 	const {
@@ -60,7 +62,7 @@ export async function load({ cookies, params }) {
 	if (surplusItems.length > 0) {
 		clearableValue = await getItemsValue(surplusItems);
 	} else {
-		clearableValue = -1 * await getItemsValue(pendingItems.filter((i) => i.amount > 0));
+		clearableValue = -1 * (await getItemsValue(pendingItems.filter((i) => i.amount > 0)));
 	}
 
 	return {
@@ -74,7 +76,6 @@ export async function load({ cookies, params }) {
 		balance,
 		name,
 		pendingItems,
-		clearableValue,
+		clearableValue
 	};
 }
-

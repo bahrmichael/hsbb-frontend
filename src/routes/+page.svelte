@@ -7,7 +7,7 @@
 	let showNewAuthNotice = false;
 
 	onMount(() => {
-		showNewAuthNotice = !!localStorage.getItem('token-v1');
+		showNewAuthNotice = !!localStorage.getItem('token-v2');
 	});
 </script>
 

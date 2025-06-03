@@ -9,13 +9,13 @@ const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ url, cookies }) {
-	const token = cookies.get('token-v1');
+	const token = cookies.get('token-v2');
 	if (!token) {
 		throw error(401, 'Unauthorized');
 	}
 
 	try {
-		const { name } = await decodeJwt(token, 'token-v1');
+		const { name } = await decodeJwt(token, 'token-v2');
 
 		if (name !== 'Lerso Nardieu') {
 			throw error(403, 'Forbidden');

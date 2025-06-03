@@ -25,7 +25,7 @@ export async function load({ cookies, request }) {
 		const data = await response.json();
 
 		if (state !== 'audit') {
-			const tokenName = state === 'ingame' ? 'token-ingame' : 'token-v1';
+			const tokenName = state === 'ingame' ? 'token-ingame' : 'token-v2';
 			cookies.set(tokenName, data.token, {
 				path: '/',
 				maxAge: 60 * 60 * 24 * 365 * 10

@@ -8,8 +8,8 @@ export async function load({ cookies, request }) {
 	const clientId = searchParams.get('client_id');
 	const apiKey = searchParams.get('api_key');
 
-		// todo: handle things like audit that should be ignored, maybe?
-	const tokenName = (clientId === HSBB || clientId === LSBB) ? 'token-v1' : `token-${clientId}`;
+	// todo: handle things like audit that should be ignored, maybe?
+	const tokenName = clientId === HSBB || clientId === LSBB ? 'token-v2' : `token-${clientId}`;
 	cookies.set(tokenName, apiKey ?? '', {
 		path: '/',
 		maxAge: 60 * 60 * 24 * 365 * 10

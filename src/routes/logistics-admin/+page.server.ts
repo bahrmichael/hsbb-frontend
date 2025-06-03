@@ -105,7 +105,7 @@ async function getOuts() {
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v1');
+	const token = cookies.get('token-v2');
 	if (!token) {
 		throw error(401, 'Unauthorized');
 	}

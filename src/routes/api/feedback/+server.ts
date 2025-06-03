@@ -4,18 +4,18 @@ import { decodeJwt } from '$lib/decode-jwt.ts';
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request, cookies }) {
-	const token = cookies.get('token-v1');
+	const token = cookies.get('token-v2');
 	if (!token) {
 		throw error(401, 'Unauthorized');
 	}
 
 	try {
-		await decodeJwt(token, 'token-v1');
+		await decodeJwt(token, 'token-v2');
 	} catch (e) {
 		console.error(e);
 		throw error(401, 'Unauthorized');
 	}
-	const { name } = await decodeJwt(token, 'token-v1');
+	const { name } = await decodeJwt(token, 'token-v2');
 
 	const payload = await request.json();
 

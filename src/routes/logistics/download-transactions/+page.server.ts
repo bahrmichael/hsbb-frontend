@@ -4,22 +4,20 @@ import { error } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v1');
+	const token = cookies.get('token-v2');
 	if (!token) {
 		return error(403);
 	}
 
 	const { characterId, name, iat } = await decodeJwt(token, request.url);
 
-	const {
-		transactions,
-	} = await loadCharacterData(characterId, 30);
+	const { transactions } = await loadCharacterData(characterId, 30);
 
 	return {
 		characterId,
 		characterName: name,
 		token,
 		iat,
-		transactions,
+		transactions
 	};
 }

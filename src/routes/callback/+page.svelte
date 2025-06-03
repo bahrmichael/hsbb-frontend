@@ -5,11 +5,11 @@
 	import { page } from '$app/stores';
 
 	$: redirectTo = $page.data.redirectTo;
-	$: error= $page.data.error;
+	$: error = $page.data.error;
 
 	onMount(() => {
 		// Clean up old local token
-		localStorage.removeItem('token-v1');
+		localStorage.removeItem('token-v2');
 
 		if (redirectTo) {
 			goto(redirectTo, { replaceState: true });
@@ -28,4 +28,3 @@
 		<span class="text-xl text-bold">Logging in ...</span>
 	{/if}
 </div>
-

@@ -3,22 +3,17 @@ import { getRequestStatus, loadCharacterData } from '$lib/logistics/data.ts';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v1');
+	const token = cookies.get('token-v2');
 	if (!token) {
 		return {
-			requiresSignIn: true,
+			requiresSignIn: true
 		};
 	}
 
 	const { characterId, name, iat } = await decodeJwt(token, request.url);
 
-	const {
-		balance,
-		transactions,
-		remainingContractCollateral,
-		outstandingContracts,
-		pendingItems,
-	} = await loadCharacterData(characterId, 30);
+	const { balance, transactions, remainingContractCollateral, outstandingContracts, pendingItems } =
+		await loadCharacterData(characterId, 30);
 
 	const { hasContractRequest, hasPayoutRequest } = await getRequestStatus(characterId);
 
@@ -33,6 +28,6 @@ export async function load({ cookies, request }) {
 		transactions,
 		remainingContractCollateral,
 		outstandingContracts,
-		pendingItems,
+		pendingItems
 	};
 }

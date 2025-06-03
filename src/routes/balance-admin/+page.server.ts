@@ -18,7 +18,7 @@ interface CharacterBalance {
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v1');
+	const token = cookies.get('token-v2');
 	if (!token) {
 		throw error(401, 'Unauthorized');
 	}
@@ -94,7 +94,7 @@ export async function load({ cookies, request }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
 	payout: async ({ cookies, request }) => {
-		const token = cookies.get('token-v1');
+		const token = cookies.get('token-v2');
 		if (!token) {
 			throw error(401, 'Unauthorized');
 		}
