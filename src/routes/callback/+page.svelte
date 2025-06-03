@@ -8,9 +8,6 @@
 	$: error = $page.data.error;
 
 	onMount(() => {
-		// Clean up old local token
-		localStorage.removeItem('token-v2');
-
 		if (redirectTo) {
 			goto(redirectTo, { replaceState: true });
 		}
