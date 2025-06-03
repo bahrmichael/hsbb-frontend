@@ -61,9 +61,9 @@ export async function POST({ request }) {
 		// Trim to keep only transactions from the last 30 days
 		const thirtyDaysAgo = new Date();
 		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-		const recentTransactions = existingTransactions.filter(
-			t => new Date(t.date) >= thirtyDaysAgo
-		);
+		const recentTransactions = existingTransactions
+			.filter((t) => new Date(t.date) >= thirtyDaysAgo)
+			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 		// Save back to KV store
 		await client.set(key, recentTransactions);
