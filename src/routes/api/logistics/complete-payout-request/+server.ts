@@ -9,15 +9,20 @@ const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ url, cookies }) {
-
 	const token = cookies.get('token-v1');
 	if (!token) {
 		throw error(401, 'Unauthorized');
 	}
-	const { name } = await decodeJwt(token, 'token-v1');
 
-	if (name !== 'Lerso Nardieu') {
-		throw error(403, 'Forbidden');
+	try {
+		const { name } = await decodeJwt(token, 'token-v1');
+
+		if (name !== 'Lerso Nardieu') {
+			throw error(403, 'Forbidden');
+		}
+	} catch (e) {
+		console.error(e);
+		throw error(401, 'Unauthorized');
 	}
 
 	const characterIdParam = url.searchParams.get('characterId');
@@ -31,39 +36,47 @@ export async function POST({ url, cookies }) {
 
 	const amount = -1 * +valueParam;
 
-	const latestTransaction = ((await ddb.send(new QueryCommand({
-		TableName: env.AWS_LOGISTICS_TABLE_NAME,
-		KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
-		ExpressionAttributeValues: {
-			':pk': `character#${characterIdParam}`,
-			':sk': 'transaction#',
-		},
-		ScanIndexForward: false,
-		Limit: 1,
-	}))).Items ?? [])[0];
+	const latestTransaction = ((
+		await ddb.send(
+			new QueryCommand({
+				TableName: env.AWS_LOGISTICS_TABLE_NAME,
+				KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+				ExpressionAttributeValues: {
+					':pk': `character#${characterIdParam}`,
+					':sk': 'transaction#'
+				},
+				ScanIndexForward: false,
+				Limit: 1
+			})
+		)
+	).Items ?? [])[0];
 
 	const newBalance = (latestTransaction?.balance ?? 0) + amount;
 
-	await ddb.send(new PutCommand({
-		TableName: env.AWS_LOGISTICS_TABLE_NAME,
-		Item: {
-			pk: `character#${characterIdParam}`,
-			sk: `transaction#${ulid()}`,
-			transactionType: 'payout',
-			amount,
-			balance: newBalance,
-			created: Date.now(),
-			version: '2'
-		}
-	}));
+	await ddb.send(
+		new PutCommand({
+			TableName: env.AWS_LOGISTICS_TABLE_NAME,
+			Item: {
+				pk: `character#${characterIdParam}`,
+				sk: `transaction#${ulid()}`,
+				transactionType: 'payout',
+				amount,
+				balance: newBalance,
+				created: Date.now(),
+				version: '2'
+			}
+		})
+	);
 
-	await ddb.send(new DeleteCommand({
-		TableName: env.AWS_LOGISTICS_TABLE_NAME,
-		Key: {
-			pk: `payoutRequests`,
-			sk: `character#${characterIdParam}`
-		}
-	}));
+	await ddb.send(
+		new DeleteCommand({
+			TableName: env.AWS_LOGISTICS_TABLE_NAME,
+			Key: {
+				pk: `payoutRequests`,
+				sk: `character#${characterIdParam}`
+			}
+		})
+	);
 
 	return new Response(null, { status: 200 });
 }

@@ -8,15 +8,20 @@ const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
 /** @type {import('./$types').RequestHandler} */
 export async function DELETE({ url, cookies }) {
-
 	const token = cookies.get('token-v1');
 	if (!token) {
 		throw error(401, 'Unauthorized');
 	}
-	const { name } = await decodeJwt(token, 'token-v1');
 
-	if (name !== 'Lerso Nardieu') {
-		throw error(403, 'Forbidden');
+	try {
+		const { name } = await decodeJwt(token, 'token-v1');
+
+		if (name !== 'Lerso Nardieu') {
+			throw error(403, 'Forbidden');
+		}
+	} catch (e) {
+		console.error(e);
+		throw error(401, 'Unauthorized');
 	}
 
 	const characterIdParam = url.searchParams.get('characterId');
@@ -24,61 +29,71 @@ export async function DELETE({ url, cookies }) {
 		error(400, 'characterId is required');
 	}
 
-	const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-		const queryResponse = await ddb
-			.send(new QueryCommand({
-				ExclusiveStartKey, ...{
-					TableName: env.AWS_LOGISTICS_TABLE_NAME,
-					KeyConditionExpression: 'pk = :pk',
-					ExpressionAttributeValues: {
-						':pk': `character#${characterIdParam}`
+	const records =
+		(await getPaginatedResults(async (ExclusiveStartKey: any) => {
+			const queryResponse = await ddb.send(
+				new QueryCommand({
+					ExclusiveStartKey,
+					...{
+						TableName: env.AWS_LOGISTICS_TABLE_NAME,
+						KeyConditionExpression: 'pk = :pk',
+						ExpressionAttributeValues: {
+							':pk': `character#${characterIdParam}`
+						}
 					}
-				}
-			}));
+				})
+			);
 
-		return {
-			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items
-		};
-	}) ?? [];
+			return {
+				marker: queryResponse.LastEvaluatedKey,
+				results: queryResponse.Items
+			};
+		})) ?? [];
 
 	for (const { pk, sk } of records) {
-		await ddb.send(new DeleteCommand({
-			TableName: env.AWS_LOGISTICS_TABLE_NAME,
-			Key: {
-				pk,
-				sk
-			}
-		}));
-	}
-
-	const outs = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-		const queryResponse = await ddb
-			.send(new QueryCommand({
-				ExclusiveStartKey, ...{
-					TableName: env.AWS_LOGISTICS_TABLE_NAME,
-					KeyConditionExpression: 'pk = :pk',
-					ExpressionAttributeValues: {
-						':pk': `out`
-					}
-				}
-			}));
-
-		return {
-			marker: queryResponse.LastEvaluatedKey,
-			results: queryResponse.Items
-		};
-	}) ?? [];
-
-	for (const { pk, sk, characterId } of outs) {
-		if (characterId === +characterIdParam) {
-			await ddb.send(new DeleteCommand({
+		await ddb.send(
+			new DeleteCommand({
 				TableName: env.AWS_LOGISTICS_TABLE_NAME,
 				Key: {
 					pk,
 					sk
 				}
-			}));
+			})
+		);
+	}
+
+	const outs =
+		(await getPaginatedResults(async (ExclusiveStartKey: any) => {
+			const queryResponse = await ddb.send(
+				new QueryCommand({
+					ExclusiveStartKey,
+					...{
+						TableName: env.AWS_LOGISTICS_TABLE_NAME,
+						KeyConditionExpression: 'pk = :pk',
+						ExpressionAttributeValues: {
+							':pk': `out`
+						}
+					}
+				})
+			);
+
+			return {
+				marker: queryResponse.LastEvaluatedKey,
+				results: queryResponse.Items
+			};
+		})) ?? [];
+
+	for (const { pk, sk, characterId } of outs) {
+		if (characterId === +characterIdParam) {
+			await ddb.send(
+				new DeleteCommand({
+					TableName: env.AWS_LOGISTICS_TABLE_NAME,
+					Key: {
+						pk,
+						sk
+					}
+				})
+			);
 		}
 	}
 
@@ -92,8 +107,11 @@ const getPaginatedResults = async (fn: any) => {
 		let NextMarker = EMPTY;
 		let count = 0;
 		while (NextMarker || NextMarker === EMPTY) {
-			const { marker, results, count: ct } =
-				await fn(NextMarker !== EMPTY ? NextMarker : undefined, count);
+			const {
+				marker,
+				results,
+				count: ct
+			} = await fn(NextMarker !== EMPTY ? NextMarker : undefined, count);
 
 			yield* results;
 

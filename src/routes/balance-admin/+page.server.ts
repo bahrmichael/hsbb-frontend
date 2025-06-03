@@ -36,7 +36,6 @@ export async function load({ cookies, request }) {
 	let cursor = 0;
 	do {
 		const result = await kv.scan(cursor, { match: 'transactions:*', count: 100 });
-		console.log({ result });
 		cursor = result[0];
 		const keys = result[1];
 
@@ -81,7 +80,7 @@ export async function load({ cookies, request }) {
 	}
 
 	// Sort by balance descending
-	balances.sort((a, b) => b.balance - a.balance);
+	balances.sort((a, b) => (a.character_name ?? '').localeCompare(b.character_name ?? ''));
 
 	return {
 		characterId,
@@ -91,3 +90,59 @@ export async function load({ cookies, request }) {
 		balances
 	};
 }
+
+/** @type {import('./$types').Actions} */
+export const actions = {
+	payout: async ({ cookies, request }) => {
+		const token = cookies.get('token-v1');
+		if (!token) {
+			throw error(401, 'Unauthorized');
+		}
+
+		const { name } = await decodeJwt(token, request.url);
+
+		if (name !== 'Lerso Nardieu') {
+			throw error(403, 'Forbidden');
+		}
+
+		const formData = await request.formData();
+		const targetCharacterId = formData.get('character_id')?.toString();
+		const currentBalance = parseFloat(formData.get('current_balance')?.toString() || '0');
+
+		if (!targetCharacterId) {
+			throw error(400, 'Character ID required');
+		}
+
+		const kv = getVercelStorageClient();
+		const key = `transactions:${targetCharacterId}`;
+
+		// Get existing transactions for this character
+		const existingTransactions: TransactionRecord[] = (await kv.get(key)) || [];
+
+		// Sort transactions by date to ensure chronological order
+		existingTransactions.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+		// Create payout transaction with negative amount to zero balance
+		const payoutAmount = -currentBalance;
+		const newRecord: TransactionRecord = {
+			date: new Date().toISOString(),
+			reward: payoutAmount,
+			balance: 0
+		};
+
+		// Add new record to the list
+		existingTransactions.push(newRecord);
+
+		// Trim to keep only transactions from the last 30 days
+		const thirtyDaysAgo = new Date();
+		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+		const recentTransactions = existingTransactions
+			.filter((t) => new Date(t.date) >= thirtyDaysAgo)
+			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+		// Save back to KV store
+		await kv.set(key, recentTransactions);
+
+		return { success: true };
+	}
+};

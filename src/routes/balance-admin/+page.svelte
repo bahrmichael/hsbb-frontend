@@ -2,6 +2,7 @@
 	import Navbar from '$lib/Navbar.svelte';
 	import Footer from '$lib/Footer.svelte';
 	import { page } from '$app/stores';
+	import { enhance } from '$app/forms';
 
 	function formatIsk(amount: number) {
 		if (!amount) return '0.00 ISK';
@@ -13,9 +14,37 @@
 		);
 	}
 
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString();
-	};
+	let copiedStates: { [key: string]: boolean } = {};
+	let payoutStates: { [key: string]: boolean } = {};
+
+	function copyToClipboard(value: string, characterId: string) {
+		navigator.clipboard.writeText(value);
+		copiedStates[characterId] = true;
+		setTimeout(() => {
+			copiedStates[characterId] = false;
+		}, 1000);
+	}
+
+	function handlePayout(characterId: string, balance: number) {
+		// Copy to clipboard first
+		copyToClipboard(formatIsk(balance), characterId);
+
+		// Show processing state
+		payoutStates[characterId] = true;
+
+		// Submit form programmatically
+		const form = document.getElementById(`payout-form-${characterId}`) as HTMLFormElement;
+		form.requestSubmit();
+	}
+
+	function formatDate(dateString: string) {
+		const date = new Date(dateString);
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric'
+		});
+	}
 </script>
 
 <svelte:head>
@@ -47,7 +76,41 @@
 													{balance.character_name ?? balance.character_id}
 												</td>
 												<td class="px-4 py-2 text-right">
-													{formatIsk(balance.balance)}
+													{#if balance.balance > 0}
+														<button
+															class="w-52 p-2 text-white rounded transition-colors duration-200 {payoutStates[
+																balance.character_id
+															]
+																? 'bg-orange-500 hover:bg-orange-500'
+																: copiedStates[balance.character_id]
+																	? 'bg-green-500 hover:bg-green-500'
+																	: 'bg-blue-500 hover:bg-blue-600'}"
+															on:click={() => handlePayout(balance.character_id, balance.balance)}
+														>
+															{formatIsk(balance.balance)}
+														</button>
+													{:else}
+														{formatIsk(balance.balance)}
+													{/if}
+
+													<form
+														id="payout-form-{balance.character_id}"
+														method="POST"
+														action="?/payout"
+														style="display: none;"
+														use:enhance={() => {
+															return async ({ result }) => {
+																payoutStates[balance.character_id] = false;
+																if (result.type === 'success') {
+																	// Refresh the page to show updated balance
+																	window.location.reload();
+																}
+															};
+														}}
+													>
+														<input type="hidden" name="character_id" value={balance.character_id} />
+														<input type="hidden" name="current_balance" value={balance.balance} />
+													</form>
 												</td>
 												<td class="px-4 py-2 text-right">
 													{balance.last_transaction_date

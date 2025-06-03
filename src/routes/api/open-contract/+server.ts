@@ -20,9 +20,17 @@ export async function POST({ url, cookies }) {
 		error(401, 'Unauthorized');
 	}
 
+	try {
+		await decodeJwt(token, 'ingame');
+	} catch (e) {
+		console.error(e);
+		throw error(401, 'Unauthorized');
+	}
 	const { characterId } = await decodeJwt(token, 'ingame');
 	const { accessToken } = await getAccessToken(characterId);
 
-	await axios.post(`https://esi.evetech.net/latest/ui/openwindow/contract/?contract_id=${contractId}&token=${accessToken}`);
+	await axios.post(
+		`https://esi.evetech.net/latest/ui/openwindow/contract/?contract_id=${contractId}&token=${accessToken}`
+	);
 	return new Response(null, { status: 200 });
 }
