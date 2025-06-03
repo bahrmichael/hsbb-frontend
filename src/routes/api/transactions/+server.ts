@@ -17,7 +17,7 @@ interface TransactionRecord {
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request }) {
 	const apiKey = request.headers.get('x-api-key');
-	if (!apiKey || apiKey !== env.TRANSACTIONS_API_KEY) {
+	if (!apiKey || apiKey !== env.HSBB_TRANSACTIONS_API_KEY) {
 		throw error(401, 'Unauthorized');
 	}
 
