@@ -5,7 +5,7 @@
 	export let selectedImage = '';
 	export let compact = false;
 
-	const storeSelect = $page.data.characterId % 4 == 0 ? 'partner' : 'markee';
+	const storeSelect = 'markee';
 
 	let showEveStore = false;
 	// Show an ad if the token was issued at least 30 days ago
