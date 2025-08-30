@@ -10,7 +10,7 @@
 	import ErrorIcon from '$lib/icons/Error.svelte';
 	import { page } from '$app/stores';
 
-	type RejectionCode = 'bad_isk_per_m3' | 'contains_capital';
+	type RejectionCode = 'bad_isk_per_m3' | 'contains_capital' | 'contains_plex';
 
 	$: requiresSignIn = $page.data.requiresSignIn || !$page.data.token;
 

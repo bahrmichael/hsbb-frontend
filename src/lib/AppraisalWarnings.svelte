@@ -24,3 +24,9 @@
 		<span>If this contract is on a highsec island, we will reject it. It contains capital ships that are too large (Orca, Freighters) for safe extraction.</span>
 	</div>
 {/if}
+{#if rejectionCodes.includes("contains_plex")}
+	<div role="alert" class="alert alert-warning my-4">
+		<WarningIcon />
+		<span>You get better rates for PLEX using our <a href="https://plex.evebuyback.com">Plex Buyback</a>.</span>
+	</div>
+{/if}
