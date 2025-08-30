@@ -1,16 +1,17 @@
-import { decodeJwt } from '$lib/decode-jwt.ts';
+import { checkAuth } from '$lib/auth-helpers';
 import { getRequestStatus, loadCharacterData } from '$lib/logistics/data.ts';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
-		return {
-			requiresSignIn: true
-		};
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
+		return authResult;
 	}
 
-	const { characterId, name, iat } = await decodeJwt(token, request.url);
+	const characterId = +(authResult.characterId ?? '0');
+	if (!characterId) {
+		throw new Error('Invalid character ID');
+	}
 
 	const { balance, transactions, remainingContractCollateral, outstandingContracts, pendingItems } =
 		await loadCharacterData(characterId, 30);
@@ -18,10 +19,7 @@ export async function load({ cookies, request }) {
 	const { hasContractRequest, hasPayoutRequest } = await getRequestStatus(characterId);
 
 	return {
-		characterId,
-		characterName: name,
-		token,
-		iat,
+		...authResult,
 		hasContractRequest,
 		hasPayoutRequest,
 		balance,

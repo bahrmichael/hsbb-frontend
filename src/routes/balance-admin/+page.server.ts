@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
-import { decodeJwt } from '$lib/decode-jwt.ts';
 import { getVercelStorageClient } from '$lib/vercel-storage.ts';
 import axios from 'axios';
+import { checkAuth } from '$lib/auth-helpers';
 
 interface TransactionRecord {
 	date: string;
@@ -18,14 +18,12 @@ interface CharacterBalance {
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
-		throw error(401, 'Unauthorized');
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
+		return authResult;
 	}
 
-	const { characterId, name, iat } = await decodeJwt(token, request.url);
-
-	if (name !== 'Lerso Nardieu') {
+	if (authResult.name !== 'Lerso Nardieu') {
 		throw error(403, 'Forbidden');
 	}
 
@@ -83,10 +81,7 @@ export async function load({ cookies, request }) {
 	balances.sort((a, b) => (a.character_name ?? '').localeCompare(b.character_name ?? ''));
 
 	return {
-		characterId,
-		characterName: name,
-		token,
-		iat,
+		...authResult,
 		balances
 	};
 }
@@ -94,14 +89,12 @@ export async function load({ cookies, request }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
 	payout: async ({ cookies, request }) => {
-		const token = cookies.get('token-v2');
-		if (!token) {
-			throw error(401, 'Unauthorized');
+		const authResult = await checkAuth(cookies, request.url);
+		if (authResult.requiresSignIn) {
+			return authResult;
 		}
 
-		const { name } = await decodeJwt(token, request.url);
-
-		if (name !== 'Lerso Nardieu') {
+		if (authResult.name !== 'Lerso Nardieu') {
 			throw error(403, 'Forbidden');
 		}
 

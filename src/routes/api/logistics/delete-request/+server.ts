@@ -1,26 +1,20 @@
 import { error } from '@sveltejs/kit';
-import { decodeJwt } from '$lib/decode-jwt.ts';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { env } from '$env/dynamic/private';
+import { checkAuth } from '$lib/auth-helpers';
 
 const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
 /** @type {import('./$types').RequestHandler} */
-export async function DELETE({ url, cookies }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
+export async function DELETE({ url, cookies, request }) {
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
 		throw error(401, 'Unauthorized');
 	}
-	try {
-		const { name } = await decodeJwt(token, 'token-v2');
 
-		if (name !== 'Lerso Nardieu') {
-			throw error(403, 'Forbidden');
-		}
-	} catch (e) {
-		console.error(e);
-		throw error(401, 'Unauthorized');
+	if (authResult.name !== 'Lerso Nardieu') {
+		throw error(403, 'Forbidden');
 	}
 
 	const characterIdParam = url.searchParams.get('characterId');

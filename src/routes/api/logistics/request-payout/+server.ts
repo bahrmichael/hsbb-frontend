@@ -1,25 +1,18 @@
 import { error } from '@sveltejs/kit';
-import { decodeJwt } from '$lib/decode-jwt.ts';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { env } from '$env/dynamic/private';
-import axios from 'axios';
+import { checkAuth } from '$lib/auth-helpers';
 
 const ddb = new DynamoDBClient({ region: 'us-east-1' });
 
 /** @type {import('./$types').RequestHandler} */
-export async function POST({ cookies }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
+export async function POST({ cookies, request }) {
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
 		throw error(401, 'Unauthorized');
 	}
-	try {
-		await decodeJwt(token, 'token-v2');
-	} catch (e) {
-		console.error(e);
-		throw error(401, 'Unauthorized');
-	}
-	const { characterId } = await decodeJwt(token, 'token-v2');
+	const { characterId } = authResult;
 
 	const transactions =
 		(
@@ -56,16 +49,5 @@ export async function POST({ cookies }) {
 		})
 	);
 
-	try {
-		await axios.post(
-			env.DISCORD_WEBHOOK!,
-			{
-				content: `We received a new payout request.`
-			},
-			{ headers: { 'Content-Type': 'application/json' } }
-		);
-	} catch (e) {
-		console.error('Failed to send request to discord.', e);
-	}
 	return new Response(JSON.stringify({ result: 'created' }), { status: 200 });
 }

@@ -105,14 +105,12 @@ async function getOuts() {
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
-		throw error(401, 'Unauthorized');
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
+		return authResult;
 	}
 
-	const { characterId, name, iat } = await decodeJwt(token, request.url);
-
-	if (name !== 'Lerso Nardieu') {
+	if (authResult.name !== 'Lerso Nardieu') {
 		throw error(403, 'Forbidden');
 	}
 
@@ -164,10 +162,7 @@ export async function load({ cookies, request }) {
 	const characters = await getCharacters(uniqueCharacterIds);
 
 	return {
-		characterId,
-		characterName: name,
-		token,
-		iat,
+		...authResult,
 		contractRequests,
 		payoutRequests,
 		characters

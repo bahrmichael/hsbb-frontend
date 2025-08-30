@@ -6,7 +6,6 @@
 	import { page } from '$app/stores';
 	import EllipsedName from '$lib/couriers/EllipsedName.svelte';
 	import { onMount } from 'svelte';
-	import SquareArrowIcon from '$lib/couriers/SquareArrowIcon.svelte';
 
 	type Courier = {
 		id: number;
@@ -48,8 +47,9 @@
 	let volumeFilter: Filter = { min: null, max: null };
 
 	function filterValue(filter: Filter, value: number) {
-		return (filter.min === null || value >= filter.min) &&
-			(filter.max === null || value <= filter.max);
+		return (
+			(filter.min === null || value >= filter.min) && (filter.max === null || value <= filter.max)
+		);
 	}
 
 	function filterRegion(expected: string, actual: string) {
@@ -70,10 +70,21 @@
 	let sortField: 'distance' | 'collateral' | 'volume' | 'reward' | 'from' | 'to' = 'reward';
 	let isSortAscending = false;
 
-	$: distanceFilteredCount = couriers.filter(courier => filterValue(distanceFilter, courier.volume > 62_500 ? courier.distanceSafe : courier.distanceShort)).length;
-	$: collateralFilteredCount = couriers.filter(courier => filterValue(collateralFilter, courier.collateral)).length;
-	$: rewardFilteredCount = couriers.filter(courier => filterValue(rewardFilter, courier.reward)).length;
-	$: volumeFilteredCount = couriers.filter(courier => filterValue(volumeFilter, courier.volume)).length;
+	$: distanceFilteredCount = couriers.filter((courier) =>
+		filterValue(
+			distanceFilter,
+			courier.volume > 62_500 ? courier.distanceSafe : courier.distanceShort
+		)
+	).length;
+	$: collateralFilteredCount = couriers.filter((courier) =>
+		filterValue(collateralFilter, courier.collateral)
+	).length;
+	$: rewardFilteredCount = couriers.filter((courier) =>
+		filterValue(rewardFilter, courier.reward)
+	).length;
+	$: volumeFilteredCount = couriers.filter((courier) =>
+		filterValue(volumeFilter, courier.volume)
+	).length;
 
 	function sort(a: Courier, b: Courier) {
 		if (sortField == 'distance') {
@@ -88,16 +99,27 @@
 		}
 	}
 
-	$: filteredCouriers = couriers.filter(courier => {
-		const distanceValid = filterValue(distanceFilter, courier.volume > 62_500 ? courier.distanceSafe : courier.distanceShort);
-		const collateralValid = filterValue(collateralFilter, courier.collateral);
-		const rewardValid = filterValue(rewardFilter, courier.reward);
-		const volumeValid = filterValue(volumeFilter, courier.volume);
-		const fromRegionValid = filterRegion(selectedStartRegion, courier.fromRegion);
-		const toRegionValid = filterRegion(selectedEndRegion, courier.toRegion);
-		return distanceValid && collateralValid && rewardValid && volumeValid && fromRegionValid && toRegionValid;
-	})
-		.sort((a, b) => isSortAscending ? sort(a, b) : sort(b, a))
+	$: filteredCouriers = couriers
+		.filter((courier) => {
+			const distanceValid = filterValue(
+				distanceFilter,
+				courier.volume > 62_500 ? courier.distanceSafe : courier.distanceShort
+			);
+			const collateralValid = filterValue(collateralFilter, courier.collateral);
+			const rewardValid = filterValue(rewardFilter, courier.reward);
+			const volumeValid = filterValue(volumeFilter, courier.volume);
+			const fromRegionValid = filterRegion(selectedStartRegion, courier.fromRegion);
+			const toRegionValid = filterRegion(selectedEndRegion, courier.toRegion);
+			return (
+				distanceValid &&
+				collateralValid &&
+				rewardValid &&
+				volumeValid &&
+				fromRegionValid &&
+				toRegionValid
+			);
+		})
+		.sort((a, b) => (isSortAscending ? sort(a, b) : sort(b, a)))
 		.slice(0, 100);
 
 	$: filteredCount = filteredCouriers.length >= 100 ? '99+' : filteredCouriers.length;
@@ -126,7 +148,7 @@
 		}
 	}
 
-	function jumps(p: { short: number, safe?: number, highlight?: 'short' | 'safe' }) {
+	function jumps(p: { short: number; safe?: number; highlight?: 'short' | 'safe' }) {
 		if (!p.safe) {
 			return p.short > 1 ? `${p.short} jumps` : `${p.short} jump`;
 		} else if (p.highlight === 'short') {
@@ -139,34 +161,19 @@
 	let regionStartNames: string[] = [];
 	let regionEndNames: string[] = [];
 	onMount(async () => {
-
 		const response = await fetch('/region-names.json');
 		const allRegionNames = await response.json();
-		regionStartNames = allRegionNames.filter((r: string) => {
-			return undefined != couriers.find(c => c.fromRegion === r);
-		}).sort((a: string, b: string) => a.localeCompare(b));
-		regionEndNames = allRegionNames.filter((r: string) => {
-			return undefined != couriers.find(c => c.toRegion === r);
-		}).sort((a: string, b: string) => a.localeCompare(b));
-
+		regionStartNames = allRegionNames
+			.filter((r: string) => {
+				return undefined != couriers.find((c) => c.fromRegion === r);
+			})
+			.sort((a: string, b: string) => a.localeCompare(b));
+		regionEndNames = allRegionNames
+			.filter((r: string) => {
+				return undefined != couriers.find((c) => c.toRegion === r);
+			})
+			.sort((a: string, b: string) => a.localeCompare(b));
 	});
-
-	let showToast = false;
-
-	async function openContractIngame(contractId: number) {
-		await fetch(`/api/open-contract/?contractId=${contractId}`, {
-			method: 'POST'
-		});
-		showToast = true;
-		setTimeout(() => showToast = false, 3_000);
-	}
-
-	async function removeAuthToken() {
-		await fetch(`/api/delete-cookie?cookieName=token-ingame`, {
-			method: `POST`
-		});
-		window.location.reload();
-	}
 </script>
 
 <svelte:head>
@@ -175,18 +182,17 @@
 
 <div id="container" class="container mx-auto">
 	<Navbar />
-	
+
 	<div class="flex flex-row gap-16 mb-8">
 		<div class="basis-2/3">
 			<h1 class="text-xl font-bold mb-4">HSBB Courier Jobs</h1>
-			<p class="mb-4">On this page you can see outstanding public couriers from HSBB. You can use the filters on the left
-				to drill down.</p>
-			<p>We update this information once per hour. Right now there are {couriers.length} couriers available.</p>
-			{#if $page.data.characterName}
-				<hr class="my-4" />
-				<p class="mt-4">You signed in for opening couriers ingame as {$page.data.characterName}. You can sign out below to switch to a different character.</p>
-				<button class="btn btn-outline mt-4" on:click={removeAuthToken}>Sign out</button>
-			{/if}
+			<p class="mb-4">
+				On this page you can see outstanding public couriers from HSBB. You can use the filters on
+				the left to drill down.
+			</p>
+			<p>
+				We update this information once per hour. Right now there are {couriers.length} couriers available.
+			</p>
 		</div>
 		<div class="basis-1/3">
 			<EveStore compact={true} />
@@ -198,26 +204,25 @@
 			<h2 class="text-lg font-bold">Filters</h2>
 			<div class="flex gap-2 m-6">
 				<label class="basis-1/2 form-control">
-					<span class="flex justify-between items-center font-bold">
-						Start Region
-					</span>
+					<span class="flex justify-between items-center font-bold"> Start Region </span>
 					<select bind:value={selectedStartRegion} class="select select-bordered w-full">
 						<option value="" selected>None</option>
 						{#each regionStartNames as region}
-							<option value={region}>{region}
-								({couriers.filter(courier => filterRegion(region, courier.fromRegion)).length})
+							<option value={region}
+								>{region}
+								({couriers.filter((courier) => filterRegion(region, courier.fromRegion)).length})
 							</option>
 						{/each}
 					</select>
 				</label>
 				<label class="basis-1/2 form-control">
-					<span class="flex justify-between items-center font-bold">
-						End Region
-					</span>
+					<span class="flex justify-between items-center font-bold"> End Region </span>
 					<select bind:value={selectedEndRegion} class="select select-bordered w-full">
 						<option value="" selected>None</option>
 						{#each regionEndNames as region}
-							<option value={region}>{region} ({couriers.filter(courier => filterRegion(region, courier.toRegion)).length}
+							<option value={region}
+								>{region} ({couriers.filter((courier) => filterRegion(region, courier.toRegion))
+									.length}
 								)
 							</option>
 						{/each}
@@ -225,149 +230,162 @@
 				</label>
 			</div>
 			<Filter bind:filter={volumeFilter} label="Volume" resultCount={volumeFilteredCount}>
-					<span class="flex justify-left gap-2 items-center">
-						<button on:click={() => volumeFilter = { min: 0, max: 12_250 }} class="btn">Small</button>
-						<button on:click={() => volumeFilter = { min: 12_251, max: 62_500 }} class="btn">Medium</button>
-						<button on:click={() => volumeFilter = { min: 62_501, max: null }} class="btn">Large</button>
-						<button on:click={() => volumeFilter = { min: null, max: null }} class="btn btn-ghost">Reset</button>
-					</span>
+				<span class="flex justify-left gap-2 items-center">
+					<button on:click={() => (volumeFilter = { min: 0, max: 12_250 })} class="btn"
+						>Small</button
+					>
+					<button on:click={() => (volumeFilter = { min: 12_251, max: 62_500 })} class="btn"
+						>Medium</button
+					>
+					<button on:click={() => (volumeFilter = { min: 62_501, max: null })} class="btn"
+						>Large</button
+					>
+					<button on:click={() => (volumeFilter = { min: null, max: null })} class="btn btn-ghost"
+						>Reset</button
+					>
+				</span>
 			</Filter>
 			<Filter bind:filter={distanceFilter} label="Distance" resultCount={distanceFilteredCount}>
-					<span class="flex justify-left gap-2 items-center">
-						<button on:click={() => distanceFilter = { min: 0, max: 15 }} class="btn">0-15</button>
-						<button on:click={() => distanceFilter = { min: 15, max: 30 }} class="btn">15-30</button>
-						<button on:click={() => distanceFilter = { min: 30, max: 50 }} class="btn">30-50</button>
-						<button on:click={() => distanceFilter = { min: 50, max: null }} class="btn">50+</button>
-						<button on:click={() => distanceFilter = { min: null, max: null }} class="btn btn-ghost">Reset</button>
-					</span>
+				<span class="flex justify-left gap-2 items-center">
+					<button on:click={() => (distanceFilter = { min: 0, max: 15 })} class="btn">0-15</button>
+					<button on:click={() => (distanceFilter = { min: 15, max: 30 })} class="btn">15-30</button
+					>
+					<button on:click={() => (distanceFilter = { min: 30, max: 50 })} class="btn">30-50</button
+					>
+					<button on:click={() => (distanceFilter = { min: 50, max: null })} class="btn">50+</button
+					>
+					<button on:click={() => (distanceFilter = { min: null, max: null })} class="btn btn-ghost"
+						>Reset</button
+					>
+				</span>
 			</Filter>
-			<Filter bind:filter={collateralFilter} label="Collateral" resultCount={collateralFilteredCount}>
-					<span class="flex justify-left gap-2 items-center">
-						<button on:click={() => collateralFilter = { min: 0, max: 500_000_000 }} class="btn">&lt;500m</button>
-						<button on:click={() => collateralFilter = { min: 500_000_000, max: 1_500_000_000 }}
-										class="btn">500m-1.5b</button>
-						<button on:click={() => collateralFilter = { min: 1_500_000_000, max: 3_000_000_000 }}
-										class="btn">1.5b-3b</button>
-						<button on:click={() => collateralFilter = { min: 3_000_000_000, max: null }} class="btn">3b+</button>
-						<button on:click={() => collateralFilter = { min: null, max: null }} class="btn btn-ghost">Reset</button>
-					</span>
+			<Filter
+				bind:filter={collateralFilter}
+				label="Collateral"
+				resultCount={collateralFilteredCount}
+			>
+				<span class="flex justify-left gap-2 items-center">
+					<button on:click={() => (collateralFilter = { min: 0, max: 500_000_000 })} class="btn"
+						>&lt;500m</button
+					>
+					<button
+						on:click={() => (collateralFilter = { min: 500_000_000, max: 1_500_000_000 })}
+						class="btn">500m-1.5b</button
+					>
+					<button
+						on:click={() => (collateralFilter = { min: 1_500_000_000, max: 3_000_000_000 })}
+						class="btn">1.5b-3b</button
+					>
+					<button
+						on:click={() => (collateralFilter = { min: 3_000_000_000, max: null })}
+						class="btn">3b+</button
+					>
+					<button
+						on:click={() => (collateralFilter = { min: null, max: null })}
+						class="btn btn-ghost">Reset</button
+					>
+				</span>
 			</Filter>
 			<Filter bind:filter={rewardFilter} label="Reward" resultCount={rewardFilteredCount}>
-					<span class="flex justify-left gap-2 items-center">
-						<button on:click={() => rewardFilter = { min: 0, max: 15_000_000 }} class="btn">0-15m</button>
-						<button on:click={() => rewardFilter = { min: 15_000_000, max: 30_000_000 }} class="btn">15-30m</button>
-						<button on:click={() => rewardFilter = { min: 30_000_000, max: 50_000_000 }} class="btn">30-50m</button>
-						<button on:click={() => rewardFilter = { min: 50_000_000, max: null }} class="btn">50m+</button>
-						<button on:click={() => rewardFilter = { min: null, max: null }} class="btn btn-ghost">Reset</button>
-					</span>
+				<span class="flex justify-left gap-2 items-center">
+					<button on:click={() => (rewardFilter = { min: 0, max: 15_000_000 })} class="btn"
+						>0-15m</button
+					>
+					<button on:click={() => (rewardFilter = { min: 15_000_000, max: 30_000_000 })} class="btn"
+						>15-30m</button
+					>
+					<button on:click={() => (rewardFilter = { min: 30_000_000, max: 50_000_000 })} class="btn"
+						>30-50m</button
+					>
+					<button on:click={() => (rewardFilter = { min: 50_000_000, max: null })} class="btn"
+						>50m+</button
+					>
+					<button on:click={() => (rewardFilter = { min: null, max: null })} class="btn btn-ghost"
+						>Reset</button
+					>
+				</span>
 			</Filter>
 		</div>
 		<div class="basis-2/3">
-
 			<h2 class="text-lg font-bold">Results ({filteredCount})</h2>
 
 			<table class="table m-6">
 				<thead>
-				<tr>
-					<th>
-						<button on:click={() => flipSort('distance')}>Distance</button>
-					</th>
-					<th>
-						<button on:click={() => flipSort('volume')}>Volume</button>
-					</th>
-					<th>
-						<button on:click={() => flipSort('collateral')}>Collateral</button>
-					</th>
-					<th>
-						<button on:click={() => flipSort('reward')}>Reward</button>
-					</th>
-					<th>
-						<button on:click={() => flipSort('from')}>From</button>
-					</th>
-					<th>
-						<button on:click={() => flipSort('to')}>To</button>
-					</th>
-					<th>Open</th>
-				</tr>
+					<tr>
+						<th>
+							<button on:click={() => flipSort('distance')}>Distance</button>
+						</th>
+						<th>
+							<button on:click={() => flipSort('volume')}>Volume</button>
+						</th>
+						<th>
+							<button on:click={() => flipSort('collateral')}>Collateral</button>
+						</th>
+						<th>
+							<button on:click={() => flipSort('reward')}>Reward</button>
+						</th>
+						<th>
+							<button on:click={() => flipSort('from')}>From</button>
+						</th>
+						<th>
+							<button on:click={() => flipSort('to')}>To</button>
+						</th>
+					</tr>
 				</thead>
 				<tbody>
-				{#each filteredCouriers as courier}
-					<tr>
-						{#if courier.distanceShort === courier.distanceSafe}
-							<td>{jumps({ short: courier.distanceShort })}</td>
-						{:else}
-							{#if courier.volume > 62_500}
+					{#each filteredCouriers as courier}
+						<tr>
+							{#if courier.distanceShort === courier.distanceSafe}
+								<td>{jumps({ short: courier.distanceShort })}</td>
+							{:else if courier.volume > 62_500}
 								<td>
-									<div class="tooltip"
-											 data-tip="For freighter sized couriers we assume the safest route. The shortest route is shown in the brackets.">{@html jumps({
-										short: courier.distanceShort,
-										safe: courier.distanceSafe,
-										highlight: 'safe'
-									})}</div>
-								</td>
-							{:else}
-								<td>
-									<div class="tooltip"
-											 data-tip="For couriers that don't need a freighter we assume the shortest route, which is shown in the brackets.">{@html jumps({
-										short: courier.distanceShort,
-										safe: courier.distanceSafe,
-										highlight: 'short'
-									})}</div>
-								</td>
-							{/if}
-						{/if}
-						<td>{shortNumber(courier.volume)} m3</td>
-						<td>{shortNumber(courier.collateral)} ISK</td>
-						<td>{shortNumber(courier.reward)} ISK</td>
-						<td>
-							<EllipsedName name={courier.from} region={courier.fromRegion} />
-						</td>
-						<td>
-							<EllipsedName name={courier.to} region={courier.toRegion} />
-						</td>
-						<td>
-							{#if $page.data.authenticated}
-								<button class="btn btn-xs btn-ghost" on:click={() => openContractIngame(courier.id)}>
-									<SquareArrowIcon />
-								</button>
-							{:else}
-								<button class="btn btn-xs btn-ghost" on:click={()=>document.getElementById('my_modal_2')?.showModal()}>
-									<SquareArrowIcon />
-								</button>
-								<dialog id="my_modal_2" class="modal">
-									<div class="modal-box text-left">
-										<h3 class="font-bold text-lg">Permission required</h3>
-										<p class="py-4">To open couriers in the EVE client for you, you have to grant that permission. Click
-											on the button below to sign in and grant it.</p>
-										<a
-											href={`https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri=${encodeURIComponent(`https://highsec.evebuyback.com/callback`)}&client_id=3247cabe27284ec9afc7c20971c45234&state=ingame&scope=esi-ui.open_window.v1`}
-											class="btn btn-primary text-gray-100">Sign in</a>
+									<div
+										class="tooltip"
+										data-tip="For freighter sized couriers we assume the safest route. The shortest route is shown in the brackets."
+									>
+										{@html jumps({
+											short: courier.distanceShort,
+											safe: courier.distanceSafe,
+											highlight: 'safe'
+										})}
 									</div>
-									<form method="dialog" class="modal-backdrop">
-										<button>close</button>
-									</form>
-								</dialog>
+								</td>
+							{:else}
+								<td>
+									<div
+										class="tooltip"
+										data-tip="For couriers that don't need a freighter we assume the shortest route, which is shown in the brackets."
+									>
+										{@html jumps({
+											short: courier.distanceShort,
+											safe: courier.distanceSafe,
+											highlight: 'short'
+										})}
+									</div>
+								</td>
 							{/if}
-						</td>
-					</tr>
-				{/each}
+							<td>{shortNumber(courier.volume)} m3</td>
+							<td>{shortNumber(courier.collateral)} ISK</td>
+							<td>{shortNumber(courier.reward)} ISK</td>
+							<td>
+								<EllipsedName name={courier.from} region={courier.fromRegion} />
+							</td>
+							<td>
+								<EllipsedName name={courier.to} region={courier.toRegion} />
+							</td>
+						</tr>
+					{/each}
 				</tbody>
 			</table>
 		</div>
-		{#if showToast}
-			<div class="toast">
-				<div class="alert alert-success">
-					<span>Contract opened.</span>
-				</div>
-			</div>
-		{/if}
 	</div>
-	
+
 	<Footer />
 </div>
 
 <style>
-    td, th {
-        text-align: right;
-    }
+	td,
+	th {
+		text-align: right;
+	}
 </style>

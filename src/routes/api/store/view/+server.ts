@@ -1,6 +1,7 @@
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { env } from '$env/dynamic/private';
+import { decodeJwt } from '$lib/decode-jwt-v2';
 
 const ddb = new DynamoDBClient({ region: 'us-east-1' });
 

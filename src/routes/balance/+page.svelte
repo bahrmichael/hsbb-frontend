@@ -51,7 +51,7 @@
 				<h1 class="text-3xl font-bold">Your Balance</h1>
 				<div class="card bg-base-100 shadow-xl">
 					<div class="card-body">
-						<h2 class="card-title">Character: {$page.data.characterName}</h2>
+						<h2 class="card-title">Character: {$page.data.name}</h2>
 						<div class="stat">
 							<div class="stat-title">Current Balance</div>
 							<div class="stat-value text-primary">{formatISK($page.data.balance)}</div>

@@ -4,15 +4,18 @@
 	import AppraisalTotals from '$lib/AppraisalTotals.svelte';
 	import AppraisalWarnings from '$lib/AppraisalWarnings.svelte';
 	import AppraisalTable from '$lib/AppraisalTable.svelte';
+	import PlexBuybackBanner from '$lib/PlexBuybackBanner.svelte';
 	import { onMount } from 'svelte';
 	import { getInstance } from '$lib/instance';
 	import EveStore from '$lib/EveStore.svelte';
 	import ErrorIcon from '$lib/icons/Error.svelte';
 	import { page } from '$app/stores';
+	import SignIn from './SignIn.svelte';
 
 	type RejectionCode = 'bad_isk_per_m3' | 'contains_capital' | 'contains_plex';
 
-	$: requiresSignIn = $page.data.requiresSignIn || !$page.data.token;
+	let requiresSignIn = $page.data.requiresSignIn || !$page.data.token;
+	let currentUrl = $derived($page.url.pathname + $page.url.search);
 
 	interface AppraisalResult {
 		appraisalFailures: string | null;
@@ -29,10 +32,10 @@
 		total: number;
 	}
 
-	let appraisalResult: AppraisalResult;
+	let appraisalResult: AppraisalResult | undefined = $state();
 
-	let calculatorInput: string = '';
-	let isHsbb = true;
+	let calculatorInput: string = $state('');
+	let isHsbb = $state(true);
 
 	onMount(() => {
 		isHsbb = getInstance() === 'highsec';
@@ -43,8 +46,8 @@
 		}
 	});
 
-	let isLoadingAppraisal = false;
-	let appraisalError: string | null;
+	let isLoadingAppraisal = $state(false);
+	let appraisalError: string | null = $state(null);
 
 	async function submit() {
 		appraisalError = null;
@@ -101,32 +104,10 @@
 			isLoadingAppraisal = false;
 		}
 	}
-
-	async function signin() {
-		// remember text, and repopulate when coming back from login
-		if (calculatorInput && calculatorInput.length > 3) {
-			localStorage.setItem('remember-text', calculatorInput);
-		}
-		// send to eve sso
-		const instance = getInstance();
-		let clientId;
-		switch (instance) {
-			case 'highsec':
-				clientId = '7817dc406c90427db9d3570bb3cc495b';
-				break;
-			case 'lowsec':
-				clientId = '542b75e8f71c4fb8aec7d58cdbc1fba5';
-				break;
-			default:
-				throw Error('Unhandled instance. ClientId resolution.');
-		}
-		window.location.replace(
-			`https://login.eveonline.com/v2/oauth/authorize/?response_type=code&redirect_uri=${encodeURIComponent(`https://${instance}.evebuyback.com/callback`)}&client_id=${clientId}&state=nah`
-		);
-	}
 </script>
 
 <div class="mb-6">
+	<PlexBuybackBanner />
 	<div class="card lg:card-side bg-neutral shadow-xl">
 		<AppraisalInfo />
 		<div class="card-body">
@@ -153,11 +134,11 @@
 						<span>{appraisalError}</span>
 					</div>
 				{/if}
-				<button class="btn" on:click={() => (calculatorInput = '')}>Clear</button>
+				<button class="btn" onclick={() => (calculatorInput = '')}>Clear</button>
 				{#if !requiresSignIn}
 					<button
 						class="btn btn-primary text-gray-100"
-						on:click={submit}
+						onclick={submit}
 						disabled={isLoadingAppraisal}
 					>
 						{#if isLoadingAppraisal}
@@ -170,9 +151,11 @@
 						class="tooltip tooltip-info"
 						data-tip="We require sign in to protect our server from malicious scripts."
 					>
-						<button class="btn btn-primary text-gray-100" on:click={signin}
-							>Sign in to enable the calculator</button
-						>
+						<SignIn
+							scope={[]}
+							redirectTo={currentUrl}
+							buttonText="Sign in to enable the calculator"
+						/>
 					</div>
 				{/if}
 			</div>

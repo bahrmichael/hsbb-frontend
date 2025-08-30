@@ -3,6 +3,7 @@ import { error } from '@sveltejs/kit';
 import { loadCharacterData } from '$lib/logistics/data.ts';
 import axios from 'axios';
 import { env } from '$env/dynamic/private';
+import { checkAuth } from '$lib/auth-helpers';
 
 async function getItemsValue(items: { typeName: string; amount: number }[]): Promise<number> {
 	if (items.length === 0) {
@@ -31,15 +32,13 @@ async function getItemsValue(items: { typeName: string; amount: number }[]): Pro
 }
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ cookies, params }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
-		throw error(401, 'Unauthorized');
+export async function load({ cookies, params, request }) {
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
+		return authResult;
 	}
 
-	const { characterId, iat } = await decodeJwt(token, 'token-v2');
-
-	if (characterId !== 93475128) {
+	if (authResult.name !== 'Lerso Nardieu') {
 		throw error(403, 'Forbidden');
 	}
 
@@ -66,10 +65,7 @@ export async function load({ cookies, params }) {
 	}
 
 	return {
-		characterId,
-		characterName: 'Admin',
-		token,
-		iat,
+		...authResult,
 		outstandingContracts,
 		transactions,
 		remainingContractCollateral,

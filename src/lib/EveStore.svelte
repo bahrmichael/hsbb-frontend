@@ -69,8 +69,6 @@
 			if (nextCampaign) {
 				selectedImage = nextCampaign.path;
 			}
-
-			await fetch(`/api/store/view?store=${storeSelect}&compact=${compact}`);
 		}
 	});
 </script>

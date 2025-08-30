@@ -1,24 +1,21 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { decodeJwt } from '$lib/decode-jwt.ts';
 import { getVercelStorageClient } from '$lib/vercel-storage.ts';
+import { checkAuth } from '$lib/auth-helpers';
 
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
-		return {
-			requiresSignIn: true
-		};
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
+		return authResult;
 	}
 
-	const { characterId, name } = await decodeJwt(token, request.url);
 	const active = (
-		((await getVercelStorageClient().get(`waitlist:${characterId}`)) as string) ?? 'inactive'
+		((await getVercelStorageClient().get(`waitlist:${authResult.characterId}`)) as string) ??
+		'inactive'
 	).startsWith('active');
 
 	return {
-		characterId,
-		characterName: name,
+		...authResult,
 		active
 	};
 }

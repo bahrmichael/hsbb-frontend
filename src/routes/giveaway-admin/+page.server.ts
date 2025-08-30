@@ -1,29 +1,24 @@
 import { error, fail } from '@sveltejs/kit';
-import { decodeJwt } from '$lib/decode-jwt.ts';
 import { getVercelStorageClient } from '$lib/vercel-storage.ts';
+import { checkAuth } from '$lib/auth-helpers';
 
 const kv = getVercelStorageClient();
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
-		throw error(401, 'Unauthorized');
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
+		return authResult;
 	}
 
-	const { characterId, name, iat } = await decodeJwt(token, request.url);
-
-	if (name !== 'Lerso Nardieu') {
+	if (authResult.name !== 'Lerso Nardieu') {
 		throw error(403, 'Forbidden');
 	}
 
 	const giveawayNames = await getGiveawayNames();
 
 	return {
-		characterId,
-		characterName: name,
-		token,
-		iat,
+		...authResult,
 		giveawayNames
 	};
 }
@@ -31,13 +26,12 @@ export async function load({ cookies, request }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
 	addCodes: async ({ request, cookies }) => {
-		const token = cookies.get('token-v2');
-		if (!token) {
-			throw error(401, 'Unauthorized');
+		const authResult = await checkAuth(cookies, request.url);
+		if (authResult.requiresSignIn) {
+			return authResult;
 		}
 
-		const { name } = await decodeJwt(token, request.url);
-		if (name !== 'Lerso Nardieu') {
+		if (authResult.name !== 'Lerso Nardieu') {
 			throw error(403, 'Forbidden');
 		}
 
@@ -68,13 +62,12 @@ export const actions = {
 	},
 
 	generateRedeemCode: async ({ request, cookies }) => {
-		const token = cookies.get('token-v2');
-		if (!token) {
-			throw error(401, 'Unauthorized');
+		const authResult = await checkAuth(cookies, request.url);
+		if (authResult.requiresSignIn) {
+			return authResult;
 		}
 
-		const { name } = await decodeJwt(token, request.url);
-		if (name !== 'Lerso Nardieu') {
+		if (authResult.name !== 'Lerso Nardieu') {
 			throw error(403, 'Forbidden');
 		}
 

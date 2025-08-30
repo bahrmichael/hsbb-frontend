@@ -1,21 +1,14 @@
 import { error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
-import { decodeJwt } from '$lib/decode-jwt.ts';
+import { checkAuth } from '$lib/auth-helpers';
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request, cookies }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
 		throw error(401, 'Unauthorized');
 	}
-
-	try {
-		await decodeJwt(token, 'token-v2');
-	} catch (e) {
-		console.error(e);
-		throw error(401, 'Unauthorized');
-	}
-	const { name } = await decodeJwt(token, 'token-v2');
+	const { name } = authResult;
 
 	const payload = await request.json();
 
