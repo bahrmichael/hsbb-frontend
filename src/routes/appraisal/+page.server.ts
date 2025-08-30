@@ -1,19 +1,15 @@
-import { decodeJwt } from '$lib/decode-jwt.ts';
+import { checkAuth } from '$lib/auth-helpers';
 
 export async function load({ cookies, request }) {
-	const token = cookies.get('token-v2');
-	if (!token) {
-		return {
-			requiresSignIn: true
-		};
+	const authResult = await checkAuth(cookies, request.url);
+	if (authResult.requiresSignIn) {
+		return authResult;
 	}
 
-	const { characterId, name, iat } = await decodeJwt(token, request.url);
-
 	return {
-		characterId,
-		characterName: name,
-		token,
-		iat
+		characterId: authResult.characterId,
+		characterName: authResult.name,
+		token: authResult.token,
+		iat: authResult.iat
 	};
 }

@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/private';
-import { decodeJwt } from '$lib/decode-jwt.ts';
+import { checkAuth } from '$lib/auth-helpers';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import axios from 'axios';

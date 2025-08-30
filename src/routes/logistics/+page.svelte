@@ -203,7 +203,7 @@
 									probably want to hand those items to your alts. We may add support for multiple
 									characters in the future, but have no immediate plans to do so.
 								</p>
-								<form class="space-y-4" on:submit|preventDefault={handleContractRequest}>
+								<form class="space-y-4" onsubmit={handleContractRequest}>
 									<div>
 										<label for="value" class="block text-sm font-medium text-gray-400 mb-2">
 											Contract Value
