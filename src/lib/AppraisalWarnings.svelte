@@ -27,6 +27,6 @@
 {#if rejectionCodes.includes("contains_plex")}
 	<div role="alert" class="alert alert-warning my-4">
 		<WarningIcon />
-		<span>You get better rates for PLEX using our <a href="https://plex.evebuyback.com">Plex Buyback</a>.</span>
+		<span>Please sell PLEX through the <a href="https://plex.evebuyback.com"><b>Plex Buyback</b></a>.</span>
 	</div>
 {/if}
