@@ -17,7 +17,7 @@ export const CLIENT_CONFIGS = {
 		jwt: env.EVE_JWT_KEY_HIGHSEC
 	},
 	lowsec: {
-		clientId: '3247cabe27284ec9afc7c20971c45234',
+		clientId: '542b75e8f71c4fb8aec7d58cdbc1fba5',
 		clientSecret: env.EVE_CLIENT_SECRET_LOWSEC,
 		jwt: env.EVE_JWT_KEY_LOWSEC
 	},
