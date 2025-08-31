@@ -1,13 +1,12 @@
 import * as jwt from 'jose';
-import { getVercelStorageClient } from '$lib/vercel-storage.ts';
+import { CLIENT_CONFIGS, urlOriginToInstance } from '$lib/eve-auth';
 
-async function getKey(instance: string) {
-	const client = getVercelStorageClient();
-	const jwtKey = await client.get(`${instance}:jwt`);
+function getKey(instance: 'highsec' | 'lowsec' | 'localhost') {
+	const jwtKey = CLIENT_CONFIGS[instance].jwt;
 	if (!jwtKey) {
-		throw new Error('JWT key not found');
+		throw new Error(`JWT key not found for instance: ${instance}`);
 	}
-	return new TextEncoder().encode(jwtKey as string);
+	return new TextEncoder().encode(jwtKey);
 }
 
 export interface DecodedToken {
@@ -20,9 +19,9 @@ export interface DecodedToken {
  * Decode and verify our own JWT tokens (not EVE SSO tokens)
  */
 export async function decodeJwt(token: string, target: string): Promise<DecodedToken> {
-	const instance = target.includes('lowsec') ? 'lsbb' : 'hsbb';
+	const instance = urlOriginToInstance(target);
 
-	const decoded = await jwt.jwtVerify(token, () => getKey(instance));
+	const decoded = await jwt.jwtVerify(token, getKey(instance));
 	const payload = decoded.payload as any;
 
 	return {
