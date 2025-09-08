@@ -68,6 +68,10 @@
 						<p class="text-sm opacity-70">General buyback for HS/LS</p>
 					</div>
 
+					<div class="p-3 bg-base-100 rounded-lg">
+						<a href="https://cash4trash.space/" class="font-semibold text-info hover:underline">Cash 4 Trash</a>
+						<p class="text-sm opacity-70">General buyback</p>
+					</div>
 
 					<div class="p-3 bg-base-100 rounded-lg">
 						<a href="https://discord.gg/tDSYVkNdBJ" class="font-semibold text-info hover:underline">JitaRun</a>
