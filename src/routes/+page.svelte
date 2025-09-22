@@ -74,8 +74,8 @@
 					</div>
 
 					<div class="p-3 bg-base-100 rounded-lg">
-						<a href="https://discord.gg/tDSYVkNdBJ" class="font-semibold text-info hover:underline">JitaRun</a>
-						<p class="text-sm opacity-70">More than just a buyback</p>
+						<a href="https://jitarun.com/?r=hsbb" class="font-semibold text-info hover:underline">JitaRun</a>
+						<p class="text-sm opacity-70">Universal buyback, covering High, Low, Null, Pochven, Zarzakh</p>
 					</div>
 
 					<div class="p-3 bg-base-100 rounded-lg">
