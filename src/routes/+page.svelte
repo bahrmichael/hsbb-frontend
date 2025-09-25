@@ -79,6 +79,11 @@
 					</div>
 
 					<div class="p-3 bg-base-100 rounded-lg">
+						<a href="https://forums.eveonline.com/t/buyback-general-hangar-cleaner-general-buyback-buying-anything-anywhere/413484" class="font-semibold text-info hover:underline">Hangar Cleaner</a>
+						<p class="text-sm opacity-70">Buying anything anywhere</p>
+					</div>
+
+					<div class="p-3 bg-base-100 rounded-lg">
 						<a href="https://discord.gg/CHNQTjPDAS" class="font-semibold text-info hover:underline">Evework's Decentralised Buyback</a>
 						<p class="text-sm opacity-70">Under Development</p>
 					</div>
