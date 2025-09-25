@@ -59,7 +59,7 @@
 
 				<div class="space-y-3">
 					<div class="p-3 bg-base-100 rounded-lg">
-						<a href="https://plex.evebuyback.com" class="font-semibold text-info hover:underline">PLEX Buyback</a>
+						<a href="https://plex.evebuyback.com/?r=hsbb" class="font-semibold text-info hover:underline">PLEX Buyback</a>
 						<p class="text-sm opacity-70">HSBB owned PLEX only buyback</p>
 					</div>
 
